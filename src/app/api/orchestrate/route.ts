@@ -10,12 +10,14 @@ export async function POST(request: Request) {
         const { direction, sendAmount, fromCountry, toCountry } = body;
 
         // Forward this request to our Node.js Global Blockchain Broker running on port 4000
+        const mappedDirection = direction === 'US_TO_IN' ? 'US_TO_INDIA' : 'INDIA_TO_US';
+
         const brokerRes = await fetch('http://localhost:4000/transfer', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 userId: session.userId,
-                direction,
+                direction: mappedDirection,
                 sendAmount,
                 fromCountry,
                 toCountry
