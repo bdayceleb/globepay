@@ -3,7 +3,8 @@
 import dynamic from 'next/dynamic';
 import { SendMoney } from '@/components/SendMoney';
 import { ReceiveMoney } from '@/components/ReceiveMoney';
-import { ArrowRightLeft } from 'lucide-react';
+import { LinkedBanks } from '@/components/LinkedBanks';
+import { ArrowRightLeft, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -44,7 +45,7 @@ export default function Home() {
     <main className="min-h-screen pb-20">
       {/* Header */}
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-10 hidden sm:block">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center mr-3">
@@ -74,7 +75,7 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-16">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-16">
         <div className="text-center max-w-2xl mx-auto">
           <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
             Global transfers, <span className="text-blue-600">instantly.</span>
@@ -85,19 +86,32 @@ export default function Home() {
         </div>
 
         {/* Main Application Area */}
-        <div className="flex flex-col md:flex-row items-start justify-center gap-8 lg:gap-12 mt-12">
+        <div className="flex flex-col lg:flex-row items-stretch justify-center gap-8 mt-12">
 
-          <div className="w-full md:w-1/2 flex justify-center md:justify-end">
+          {/* Column 1: Funding & Balances */}
+          <div className="w-full lg:w-1/3 flex justify-center">
+            <LinkedBanks />
+          </div>
+
+          <div className="hidden lg:flex flex-col items-center justify-center h-full self-center">
+            <div className="bg-white p-3 rounded-full shadow-sm border border-slate-100 z-10 text-slate-400">
+              <ArrowRight className="w-6 h-6" />
+            </div>
+          </div>
+
+          {/* Column 2: Send Money (The Tunnel) */}
+          <div className="w-full lg:w-1/3 flex justify-center">
             <SendMoney />
           </div>
 
-          <div className="hidden md:flex flex-col items-center justify-center h-full self-center">
+          <div className="hidden lg:flex flex-col items-center justify-center h-full self-center">
             <div className="bg-white p-3 rounded-full shadow-sm border border-slate-100 z-10 text-slate-400">
               <ArrowRightLeft className="w-6 h-6" />
             </div>
           </div>
 
-          <div className="w-full md:w-1/2 flex justify-center md:justify-start">
+          {/* Column 3: Receive / Wallets */}
+          <div className="w-full lg:w-1/3 flex justify-center">
             <ReceiveMoney />
           </div>
 
