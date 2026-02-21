@@ -157,11 +157,35 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
         }
 
         setIsPaying(true);
-        // Simulate payment processing
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setIsPaying(false);
-        setStep('success');
-        onStatusChange('initiated');
+
+        try {
+            // Forward the transfer payload to the Node.js production engine
+            const res = await fetch('/api/orchestrate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    direction,
+                    sendAmount: parsedAmount,
+                    fromCountry: direction === 'US_TO_IN' ? 'US' : 'IN',
+                    toCountry: direction === 'US_TO_IN' ? 'IN' : 'US'
+                })
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                setStep('success');
+                onStatusChange('initiated');
+                // Note: The UI RecentTransfers panel will automatically pick up the real-time Firebase WebSockets 
+                // broadcasted back from the Node backend now.
+            } else {
+                throw new Error(data.error || 'Failed to dispatch via broker');
+            }
+        } catch (error: any) {
+            console.error("Broker connection failed:", error);
+            alert("Payment declined: " + error.message);
+        } finally {
+            setIsPaying(false);
+        }
     };
 
     if (step === 'success') {
