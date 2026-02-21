@@ -32,13 +32,13 @@ export function Navbar() {
                     {/* CTA Buttons */}
                     <div className="flex items-center space-x-6">
                         <Link
-                            href="/dashboard"
+                            href="/login"
                             className="text-[15px] font-semibold text-white hover:text-[#DDF51A] transition hidden sm:block"
                         >
                             Log in
                         </Link>
                         <Link
-                            href="/dashboard"
+                            href="/register"
                             className="bg-[#DDF51A] hover:bg-[#c5dc17] text-[#0A1128] px-6 py-2.5 rounded-full text-[15px] font-bold transition"
                         >
                             Register
