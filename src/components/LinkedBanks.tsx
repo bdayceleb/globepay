@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Building2, Plus, PlusCircle, Trash2, Wallet, ArrowDown, Eye, CheckCircle } from 'lucide-react';
 
 interface BankAccount {
@@ -33,6 +33,35 @@ export function LinkedBanks() {
 
     const [isAddingMoney, setIsAddingMoney] = useState(false);
     const [addAmount, setAddAmount] = useState('');
+
+    const [isFundingLoading, setIsFundingLoading] = useState(true);
+
+    // Fetch User Funding Data on Mount
+    useEffect(() => {
+        const fetchFundingData = async () => {
+            try {
+                const res = await fetch('/api/user/funding');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        setBalance(data.fiatBalance || 0);
+                        // Add local UI state properties to the fetched banks
+                        const mappedBanks = (data.linkedBanks || []).map((b: any) => ({
+                            ...b,
+                            balanceVisible: false,
+                            mockBalance: Math.floor(10000 + Math.random() * 90000)
+                        }));
+                        setBanks(mappedBanks);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch funding data", error);
+            } finally {
+                setIsFundingLoading(false);
+            }
+        };
+        fetchFundingData();
+    }, []);
 
     const IND_BANKS = [
         { name: 'State Bank of India (SBI)', icon: '🏛️' },
@@ -81,26 +110,58 @@ export function LinkedBanks() {
         }
 
         setIsLinking(true);
-        setTimeout(() => {
+        setTimeout(async () => {
             const selectedBank = IND_BANKS.find(b => b.name === newBankName);
-            const newBank: BankAccount = {
+            const newBank = {
                 id: Date.now().toString(),
                 bankName: newBankName,
                 icon: selectedBank?.icon || '🏦',
                 accountNumber: newAccNum,
                 ifscCode: newIfsc,
                 isDefault: banks.length === 0,
-                balanceVisible: false,
-                mockBalance: Math.floor(10000 + Math.random() * 90000)
             };
-            setBanks([...banks, newBank]);
-            setIsAddingBank(false);
-            setIsLinking(false);
+
+            // PERSIST TO DATABASE
+            try {
+                const res = await fetch('/api/user/funding', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'ADD_BANK', payload: newBank })
+                });
+
+                if (res.ok) {
+                    setBanks([...banks, { ...newBank, balanceVisible: false, mockBalance: Math.floor(10000 + Math.random() * 90000) }]);
+                    setIsAddingBank(false);
+                } else {
+                    setLinkError("Failed to link bank to database.");
+                }
+            } catch (e) {
+                setLinkError("Network error.");
+            } finally {
+                setIsLinking(false);
+            }
         }, 1000);
     };
 
-    const handleRemoveBank = (id: string) => {
+    const handleRemoveBank = async (id: string) => {
+        // Optimistic UI Update
+        const previousBanks = [...banks];
         setBanks(banks.filter(b => b.id !== id));
+
+        try {
+            const res = await fetch('/api/user/funding', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'REMOVE_BANK', payload: { id } })
+            });
+            if (!res.ok) {
+                setBanks(previousBanks); // Revert on failure
+                alert("Failed to remove bank");
+            }
+        } catch (e) {
+            setBanks(previousBanks);
+            alert("Network error. Could not remove bank.");
+        }
     };
 
     const toggleBalance = (id: string) => {
@@ -112,11 +173,26 @@ export function LinkedBanks() {
         if (!addAmount || isNaN(Number(addAmount)) || Number(addAmount) <= 0) return;
 
         setIsAddingMoney(true);
-        // Simulate an ACH/UPI pull from the default bank
-        setTimeout(() => {
-            setBalance(prev => prev + Number(addAmount));
-            setAddAmount('');
-            setIsAddingMoney(false);
+        // Simulate an ACH/UPI pull from the default bank and persist to DB
+        setTimeout(async () => {
+            try {
+                const res = await fetch('/api/user/funding', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'ADD_FUNDS', payload: { amount: Number(addAmount) } })
+                });
+
+                if (res.ok) {
+                    setBalance(prev => prev + Number(addAmount));
+                    setAddAmount('');
+                } else {
+                    alert("Failed to add funds.");
+                }
+            } catch (error) {
+                alert("Network error.");
+            } finally {
+                setIsAddingMoney(false);
+            }
         }, 1200);
     };
 

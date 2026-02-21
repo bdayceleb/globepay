@@ -26,6 +26,14 @@ export interface User {
         panCard: string;
         fullName: string;
     };
+    fiatBalance: number;
+    linkedBanks: {
+        id: string;
+        bankName: string;
+        icon: string;
+        accountNumber: string; // Stored encrypted
+        ifscCode: string; // Stored as plain text (public routing info)
+    }[];
 }
 
 export const db = {
@@ -59,7 +67,12 @@ export const db = {
                                 panCard: decryptData(rawUser.kycDetails.panCard),
                                 fullName: decryptData(rawUser.kycDetails.fullName),
                             }
-                        })
+                        }),
+                        fiatBalance: rawUser.fiatBalance || 0,
+                        linkedBanks: (rawUser.linkedBanks || []).map(bank => ({
+                            ...bank,
+                            accountNumber: decryptData(bank.accountNumber)
+                        }))
                     };
                 }
             });
@@ -91,7 +104,12 @@ export const db = {
                         panCard: decryptData(rawUser.kycDetails.panCard),
                         fullName: decryptData(rawUser.kycDetails.fullName),
                     }
-                })
+                }),
+                fiatBalance: rawUser.fiatBalance || 0,
+                linkedBanks: (rawUser.linkedBanks || []).map(bank => ({
+                    ...bank,
+                    accountNumber: decryptData(bank.accountNumber)
+                }))
             };
         } catch (e) {
             console.error("Firestore error:", e);
@@ -107,6 +125,11 @@ export const db = {
             ...user,
             email: encryptData(user.email),
             phone: user.phone ? encryptData(user.phone) : undefined,
+            fiatBalance: user.fiatBalance || 0,
+            linkedBanks: (user.linkedBanks || []).map(bank => ({
+                ...bank,
+                accountNumber: encryptData(bank.accountNumber)
+            }))
         };
 
         try {
@@ -120,7 +143,17 @@ export const db = {
 
     updateUser: async (id: string, updates: Partial<User>): Promise<void> => {
         try {
-            await updateDoc(doc(firestore, 'users', id), updates);
+            // Need to encrypt arrays if they are being updated directly
+            let safeUpdates = { ...updates };
+
+            if (updates.linkedBanks) {
+                safeUpdates.linkedBanks = updates.linkedBanks.map(bank => ({
+                    ...bank,
+                    accountNumber: encryptData(bank.accountNumber)
+                }));
+            }
+
+            await updateDoc(doc(firestore, 'users', id), safeUpdates);
         } catch (e) {
             console.error("Firestore error updating user:", e);
             throw e;
