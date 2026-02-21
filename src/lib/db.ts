@@ -30,32 +30,45 @@ export interface User {
 
 export const db = {
     findUserByEmail: async (email: string): Promise<User | undefined> => {
-        // Because the database is fully encrypted, we must search for the encrypted version of the email.
-        const encryptedQueryEmail = encryptData(email);
-        console.log(`[DB] Looking up user by encrypted email: ${encryptedQueryEmail}`);
+        console.log(`[DB] Looking up user by email: ${email}`);
 
         try {
-            const q = query(collection(firestore, 'users'), where('email', '==', encryptedQueryEmail));
-            console.log(`[DB] Query created, fetching docs...`);
-            const qs = await getDocs(q);
-            console.log(`[DB] Query returned ${qs.size} docs`);
+            // For a secure, encrypted database, we cannot standard query by email because AES
+            // generates unique ciphertexts (random salts). In a production app, we would use a
+            // "Blind Index" (like a SHA-256 hash of the email) to query. For the scope of this
+            // prototype, we fetch and decrypt the user records into memory to find the match.
+            const qs = await getDocs(collection(firestore, 'users'));
+            console.log(`[DB] Scanning ${qs.size} encrypted users...`);
 
-            if (qs.empty) return undefined;
+            let matchedUser: User | undefined;
 
-            const rawUser = qs.docs[0].data() as User;
-            // Return to the application in plaintext
-            return {
-                ...rawUser,
-                email: decryptData(rawUser.email),
-                phone: rawUser.phone ? decryptData(rawUser.phone) : undefined,
-                ...(rawUser.kycDetails && {
-                    kycDetails: {
-                        aadharCard: decryptData(rawUser.kycDetails.aadharCard),
-                        panCard: decryptData(rawUser.kycDetails.panCard),
-                        fullName: decryptData(rawUser.kycDetails.fullName),
-                    }
-                })
-            };
+            qs.forEach((docSnap) => {
+                if (matchedUser) return; // Exit if already found
+
+                const rawUser = docSnap.data() as User;
+                const decryptedEmail = decryptData(rawUser.email);
+
+                if (decryptedEmail.toLowerCase() === email.toLowerCase()) {
+                    matchedUser = {
+                        ...rawUser,
+                        email: decryptedEmail,
+                        phone: rawUser.phone ? decryptData(rawUser.phone) : undefined,
+                        ...(rawUser.kycDetails && {
+                            kycDetails: {
+                                aadharCard: decryptData(rawUser.kycDetails.aadharCard),
+                                panCard: decryptData(rawUser.kycDetails.panCard),
+                                fullName: decryptData(rawUser.kycDetails.fullName),
+                            }
+                        })
+                    };
+                }
+            });
+
+            if (!matchedUser) {
+                console.log(`[DB] No matching user found for email.`);
+            }
+
+            return matchedUser;
         } catch (e) {
             console.error("Firestore error:", e);
             return undefined;
