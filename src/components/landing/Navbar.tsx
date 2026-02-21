@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import { getSession } from '@/lib/session';
 
-export function Navbar() {
+export async function Navbar() {
+    const session = await getSession();
     return (
         <nav className="absolute top-0 left-0 right-0 z-50 bg-transparent py-4">
             <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
@@ -31,18 +33,29 @@ export function Navbar() {
 
                     {/* CTA Buttons */}
                     <div className="flex items-center space-x-6">
-                        <Link
-                            href="/login"
-                            className="text-[15px] font-semibold text-white hover:text-[#DDF51A] transition hidden sm:block"
-                        >
-                            Log in
-                        </Link>
-                        <Link
-                            href="/register"
-                            className="bg-[#DDF51A] hover:bg-[#c5dc17] text-[#0A1128] px-6 py-2.5 rounded-full text-[15px] font-bold transition"
-                        >
-                            Register
-                        </Link>
+                        {session ? (
+                            <Link
+                                href="/dashboard"
+                                className="bg-[#DDF51A] hover:bg-[#c5dc17] text-[#0A1128] px-6 py-2.5 rounded-full text-[15px] font-bold transition"
+                            >
+                                Dashboard
+                            </Link>
+                        ) : (
+                            <>
+                                <Link
+                                    href="/login"
+                                    className="text-[15px] font-semibold text-white hover:text-[#DDF51A] transition hidden sm:block"
+                                >
+                                    Log in
+                                </Link>
+                                <Link
+                                    href="/register"
+                                    className="bg-[#DDF51A] hover:bg-[#c5dc17] text-[#0A1128] px-6 py-2.5 rounded-full text-[15px] font-bold transition"
+                                >
+                                    Register
+                                </Link>
+                            </>
+                        )}
                     </div>
 
                 </div>

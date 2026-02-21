@@ -9,6 +9,7 @@ export default function RegisterPage() {
 
     // Step 1 Details
     const [email, setEmail] = useState('');
+    const [countryCode, setCountryCode] = useState('+1');
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
 
@@ -26,11 +27,12 @@ export default function RegisterPage() {
         setError('');
 
         try {
+            const fullPhone = `${countryCode}${phone}`;
             // First simulate sending the OTP
             const res = await fetch('/api/auth/send-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, phone }),
+                body: JSON.stringify({ email, phone: fullPhone }),
             });
 
             const data = await res.json();
@@ -58,11 +60,12 @@ export default function RegisterPage() {
         }
 
         try {
+            const fullPhone = `${countryCode}${phone}`;
             // Both OTPs verified, proceed to actual registration
             const res = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, phone, password }),
+                body: JSON.stringify({ email, phone: fullPhone, password }),
             });
 
             const data = await res.json();
@@ -106,14 +109,32 @@ export default function RegisterPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                            <input
-                                type="tel"
-                                required
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00B9FF] focus:border-transparent outline-none transition"
-                                placeholder="+1 (555) 000-0000"
-                            />
+                            <div className="flex space-x-2">
+                                <select
+                                    value={countryCode}
+                                    onChange={(e) => setCountryCode(e.target.value)}
+                                    className="w-1/3 px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00B9FF] focus:border-transparent outline-none transition bg-white"
+                                >
+                                    <option value="+1">🇺🇸 +1 (US)</option>
+                                    <option value="+44">🇬🇧 +44 (UK)</option>
+                                    <option value="+91">🇮🇳 +91 (IN)</option>
+                                    <option value="+61">🇦🇺 +61 (AU)</option>
+                                    <option value="+81">🇯🇵 +81 (JP)</option>
+                                    <option value="+49">🇩🇪 +49 (DE)</option>
+                                    <option value="+33">🇫🇷 +33 (FR)</option>
+                                    <option value="+55">🇧🇷 +55 (BR)</option>
+                                    <option value="+27">🇿🇦 +27 (ZA)</option>
+                                    <option value="+971">🇦🇪 +971 (AE)</option>
+                                </select>
+                                <input
+                                    type="tel"
+                                    required
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    className="w-2/3 px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00B9FF] focus:border-transparent outline-none transition"
+                                    placeholder="(555) 000-0000"
+                                />
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
