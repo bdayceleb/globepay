@@ -276,6 +276,11 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
                             <option value="" disabled className="text-black">Select Sender Country</option>
                             <option value="US" className="text-black">🇺🇸 United States (USD)</option>
                             <option value="IN" className="text-black">🇮🇳 India (INR)</option>
+                            <option value="UK" disabled className="text-gray-400">🇬🇧 United Kingdom (GBP) - Coming Soon</option>
+                            <option value="EU" disabled className="text-gray-400">🇪🇺 Europe (EUR) - Coming Soon</option>
+                            <option value="CA" disabled className="text-gray-400">🇨🇦 Canada (CAD) - Coming Soon</option>
+                            <option value="AU" disabled className="text-gray-400">🇦🇺 Australia (AUD) - Coming Soon</option>
+                            <option value="SG" disabled className="text-gray-400">🇸🇬 Singapore (SGD) - Coming Soon</option>
                         </select>
                         <ChevronDown className="w-5 h-5 absolute right-3 top-4 text-blue-200 pointer-events-none" />
                         <div className="absolute -top-2.5 left-3 bg-[#0A1128] px-1 text-[10px] text-blue-200 font-bold uppercase tracking-wider">From</div>
@@ -300,6 +305,11 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
                             <option value="" disabled className="text-black">Select Receiver Country</option>
                             <option value="IN" className="text-black">🇮🇳 India (INR)</option>
                             <option value="US" className="text-black">🇺🇸 United States (USD)</option>
+                            <option value="UK" disabled className="text-gray-400">🇬🇧 United Kingdom (GBP) - Coming Soon</option>
+                            <option value="EU" disabled className="text-gray-400">🇪🇺 Europe (EUR) - Coming Soon</option>
+                            <option value="CA" disabled className="text-gray-400">🇨🇦 Canada (CAD) - Coming Soon</option>
+                            <option value="AU" disabled className="text-gray-400">🇦🇺 Australia (AUD) - Coming Soon</option>
+                            <option value="SG" disabled className="text-gray-400">🇸🇬 Singapore (SGD) - Coming Soon</option>
                         </select>
                         <ChevronDown className="w-5 h-5 absolute right-3 top-4 text-blue-200 pointer-events-none" />
                         <div className="absolute -top-2.5 left-3 bg-[#0A1128] px-1 text-[10px] text-blue-200 font-bold uppercase tracking-wider">To</div>

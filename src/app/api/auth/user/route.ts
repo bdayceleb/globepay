@@ -18,7 +18,10 @@ export async function GET() {
         user: {
             id: user.id,
             email: user.email,
-            isKycComplete: user.isKycComplete
+            phone: user.phone,
+            isKycComplete: user.isKycComplete,
+            kycDetails: user.kycDetails,
+            fiatBalance: user.fiatBalance
         }
     });
 }
