@@ -80,32 +80,22 @@ export default function Home() {
         </div>
 
         {/* Main Application Area */}
-        <div className="flex flex-col lg:flex-row items-stretch justify-center gap-8 mt-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-10">
 
           {/* Column 1: Recent Transfers */}
-          <div className="w-full lg:w-1/4 xl:w-[28%] flex justify-center">
+          <div className="lg:col-span-3 xl:col-span-3">
             <RecentTransfers />
           </div>
 
-          <div className="hidden lg:flex flex-col items-center justify-center h-full self-center">
-            <div className="bg-white p-2 rounded-full shadow-sm border border-slate-100 z-10 text-slate-400">
-              <ArrowRight className="w-5 h-5" />
-            </div>
-          </div>
-
           {/* Column 2: Send Money Engine (Primary) */}
-          <div className="w-full lg:w-[45%] xl:w-[40%] flex justify-center">
-            <SendMoneyEngine onStatusChange={setTransferStatus} />
-          </div>
-
-          <div className="hidden lg:flex flex-col items-center justify-center h-full self-center">
-            <div className="bg-white p-2 rounded-full shadow-sm border border-slate-100 z-10 text-slate-400">
-              <ArrowRight className="w-5 h-5" />
+          <div className="lg:col-span-6 xl:col-span-6 flex justify-center">
+            <div className="w-full max-w-2xl">
+              <SendMoneyEngine onStatusChange={setTransferStatus} />
             </div>
           </div>
 
           {/* Column 3: Transfer Tracker */}
-          <div className="w-full lg:w-1/4 xl:w-[28%] flex justify-center">
+          <div className="lg:col-span-3 xl:col-span-3">
             <TransferTracker status={transferStatus} />
           </div>
 
