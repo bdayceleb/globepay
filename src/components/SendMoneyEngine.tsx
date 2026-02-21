@@ -24,10 +24,32 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
     const [purposeCode, setPurposeCode] = useState('P0104');
     const [lrsChecked, setLrsChecked] = useState(false);
 
+    // Live Rates State
+    const [liveRates, setLiveRates] = useState<{ USD_TO_INR: number; INR_TO_USD: number }>({ USD_TO_INR: 83.00, INR_TO_USD: 0.0120 });
+    const [isRatesLoading, setIsRatesLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchRates = async () => {
+            try {
+                const res = await fetch('/api/rates');
+                const data = await res.json();
+                if (data.success && data.rates) {
+                    setLiveRates(data.rates);
+                }
+            } catch (error) {
+                console.error("Failed to fetch rates:", error);
+            } finally {
+                setIsRatesLoading(false);
+            }
+        };
+        fetchRates();
+    }, []);
+
+    // Dynamic Constants
     // Dynamic Constants
     const fromCurrency = direction === 'US_TO_IN' ? 'USD' : 'INR';
     const toCurrency = direction === 'US_TO_IN' ? 'INR' : 'USD';
-    const exchangeRate = direction === 'US_TO_IN' ? 82.50 : 0.012; // Mock rates
+    const exchangeRate = direction === 'US_TO_IN' ? liveRates.USD_TO_INR : liveRates.INR_TO_USD;
     const serviceFee = direction === 'US_TO_IN' ? 4.99 : 399.00; // Flat fee
     const fxMargin = 0.005; // 0.5% margin
 
@@ -110,21 +132,21 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
     };
 
     return (
-        <div className="bg-white rounded-[24px] shadow-xl border border-slate-100 overflow-hidden w-full max-w-2xl mx-auto">
+        <div className="bg-white rounded-[20px] shadow-xl border border-slate-100 overflow-hidden w-full max-w-2xl mx-auto flex flex-col max-h-[85vh]">
             {/* Direction Selector Header */}
-            <div className="bg-[#0A1128] p-6 text-white">
+            <div className="bg-[#0A1128] p-4 text-white shrink-0">
                 <div className="flex items-center justify-between mb-2">
                     <h2 className="text-xl font-bold">Transfer Details</h2>
                 </div>
                 <div className="flex items-center space-x-4">
                     <div
                         onClick={() => setDirection('US_TO_IN')}
-                        className={`cursor-pointer flex-1 p-4 rounded-xl border transition-all ${direction === 'US_TO_IN' ? 'bg-white/10 border-blue-400' : 'border-white/20 hover:bg-white/5'}`}
+                        className={`cursor-pointer flex-1 p-3 rounded-xl border transition-all ${direction === 'US_TO_IN' ? 'bg-white/10 border-blue-400' : 'border-white/20 hover:bg-white/5'}`}
                     >
-                        <div className="text-xs text-blue-200 mb-1">From</div>
-                        <div className="flex items-center space-x-2 font-bold">
-                            <span className="text-2xl">🇺🇸</span>
-                            <span>United States (USD)</span>
+                        <div className="text-[10px] text-blue-200 mb-0.5">From</div>
+                        <div className="flex items-center space-x-2 font-bold text-sm">
+                            <span className="text-xl">🇺🇸</span>
+                            <span>USD</span>
                         </div>
                     </div>
 
@@ -134,12 +156,12 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
 
                     <div
                         onClick={() => setDirection('IN_TO_US')}
-                        className={`cursor-pointer flex-1 p-4 rounded-xl border transition-all ${direction === 'IN_TO_US' ? 'bg-white/10 border-blue-400' : 'border-white/20 hover:bg-white/5'}`}
+                        className={`cursor-pointer flex-1 p-3 rounded-xl border transition-all ${direction === 'IN_TO_US' ? 'bg-white/10 border-blue-400' : 'border-white/20 hover:bg-white/5'}`}
                     >
-                        <div className="text-xs text-blue-200 mb-1">To</div>
-                        <div className="flex items-center space-x-2 font-bold">
-                            <span className="text-2xl">🇮🇳</span>
-                            <span>India (INR)</span>
+                        <div className="text-[10px] text-blue-200 mb-0.5">To</div>
+                        <div className="flex items-center space-x-2 font-bold text-sm">
+                            <span className="text-xl">🇮🇳</span>
+                            <span>INR</span>
                         </div>
                     </div>
                 </div>
@@ -151,106 +173,105 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
                 )}
             </div>
 
-            <div className="p-6 sm:p-8 space-y-8">
+            <div className="p-4 sm:p-5 space-y-5 overflow-y-auto">
                 {/* Calculator Section */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                     {/* You Send */}
-                    <div className="flex items-center border border-slate-200 rounded-xl p-4 bg-slate-50 focus-within:ring-2 focus-within:ring-blue-500 focus-within:bg-white transition-all">
+                    <div className="flex items-center border border-slate-200 rounded-xl p-3 bg-slate-50 focus-within:ring-2 focus-within:ring-blue-500 focus-within:bg-white transition-all">
                         <div className="flex-1">
-                            <div className="text-sm font-medium text-slate-500 mb-1">You send exactly</div>
+                            <div className="text-[11px] font-medium text-slate-500 mb-0.5">You send exactly</div>
                             <input
                                 type="number"
                                 value={sendAmount}
                                 onChange={(e) => setSendAmount(e.target.value)}
-                                className="w-full bg-transparent text-3xl font-extrabold text-[#0A1128] outline-none"
+                                className="w-full bg-transparent text-2xl font-extrabold text-[#0A1128] outline-none"
                                 placeholder="1,000"
                             />
                         </div>
-                        <div className="flex items-center bg-white border border-slate-200 px-4 py-2 rounded-lg font-bold">
+                        <div className="flex items-center bg-white border border-slate-200 px-3 py-1.5 rounded-lg font-bold text-sm">
                             {direction === 'US_TO_IN' ? '🇺🇸 USD' : '🇮🇳 INR'}
                         </div>
                     </div>
 
                     {/* Breakdown */}
-                    <div className="pl-6 space-y-3 relative border-l-2 border-slate-100 py-2">
-                        <div className="flex justify-between items-center text-sm">
+                    <div className="pl-5 space-y-2 relative border-l-2 border-slate-100 py-1">
+                        <div className="flex justify-between items-center text-[12px]">
                             <div className="flex items-center text-slate-500">
-                                <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mr-3 font-bold text-xs">-</span>
+                                <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mr-2 font-bold text-[10px]">-</span>
                                 Service Fee
                             </div>
                             <span className="font-semibold text-slate-700">{serviceFee.toFixed(2)} {fromCurrency}</span>
                         </div>
 
                         {taxAmount > 0 && (
-                            <div className="flex justify-between items-center text-sm">
+                            <div className="flex justify-between items-center text-[12px]">
                                 <div className="flex items-center text-slate-500">
-                                    <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mr-3 font-bold text-xs">-</span>
+                                    <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mr-2 font-bold text-[10px]">-</span>
                                     {direction === 'IN_TO_US' ? (isTcsApplicable ? 'TCS (20%)' : 'GST (5%)') : 'Tax'}
                                 </div>
                                 <span className="font-semibold text-slate-700">{taxAmount.toFixed(2)} {fromCurrency}</span>
                             </div>
                         )}
 
-                        <div className="flex justify-between items-center text-sm">
+                        <div className="flex justify-between items-center text-[12px]">
                             <div className="flex items-center text-slate-500">
-                                <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mr-3 font-bold text-xs">=</span>
+                                <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mr-2 font-bold text-[10px]">=</span>
                                 Amount we'll convert
                             </div>
                             <span className="font-semibold text-slate-700">{parsedAmount.toFixed(2)} {fromCurrency}</span>
                         </div>
 
-                        <div className="flex justify-between items-center text-sm group cursor-pointer">
+                        <div className="flex justify-between items-center text-[12px] group cursor-pointer">
                             <div className="flex items-center text-green-600 font-medium">
-                                <span className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 font-bold text-xs">×</span>
-                                Guaranteed Rate (Includes FX Spread)
+                                <span className="w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-2 font-bold text-[10px]">×</span>
+                                Guaranteed Rate {isRatesLoading ? '(Loading...)' : ''}
                             </div>
                             <span className="font-bold text-green-600">{ourRate.toFixed(4)}</span>
                         </div>
 
-                        <div className="text-[10px] text-slate-400 pl-9">
-                            Mid-market rate: {exchangeRate.toFixed(4)} (Our profit: {fxProfit.toFixed(2)} {toCurrency})
+                        <div className="text-[9px] text-slate-400 pl-7">
+                            Live mid-market rate: {exchangeRate.toFixed(4)} (Our profit: {fxProfit.toFixed(2)} {toCurrency})
                         </div>
                     </div>
 
                     {/* Recipient Gets */}
-                    <div className="flex items-center border border-slate-200 rounded-xl p-4 bg-slate-50">
+                    <div className="flex items-center border border-slate-200 rounded-xl p-3 bg-slate-50">
                         <div className="flex-1">
-                            <div className="text-sm font-medium text-slate-500 mb-1">Recipient gets</div>
-                            <div className="text-3xl font-extrabold text-[#0A1128]">
+                            <div className="text-[11px] font-medium text-slate-500 mb-0.5">Recipient gets</div>
+                            <div className="text-2xl font-extrabold text-[#0A1128]">
                                 {recipientGets.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                         </div>
-                        <div className="flex items-center bg-white border border-slate-200 px-4 py-2 rounded-lg font-bold">
+                        <div className="flex items-center bg-white border border-slate-200 px-3 py-1.5 rounded-lg font-bold text-sm">
                             {direction === 'US_TO_IN' ? '🇮🇳 INR' : '🇺🇸 USD'}
                         </div>
                     </div>
                 </div>
 
                 {/* Recipient Details Form */}
-                <div className="border-t border-slate-100 pt-8">
-                    <h3 className="font-bold text-[#0A1128] mb-4 flex items-center">
-                        <Building2 className="w-5 h-5 mr-2 text-slate-400" />
+                <div className="border-t border-slate-100 pt-5 shrink-0">
+                    <h3 className="font-bold text-[#0A1128] text-sm mb-3 flex items-center">
+                        <Building2 className="w-4 h-4 mr-2 text-slate-400" />
                         Recipient Bank Details
                     </h3>
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         <div>
-                            <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Account Holder Name</label>
                             <input
                                 type="text"
                                 value={recipientName}
                                 onChange={(e) => setRecipientName(e.target.value)}
-                                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                                className="w-full p-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
                                 placeholder="Full legal name"
                             />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Account Number</label>
                                 <input
                                     type="text"
                                     value={accountNumber}
                                     onChange={(e) => setAccountNumber(e.target.value)}
-                                    className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono"
+                                    className="w-full p-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono"
                                     placeholder="Number"
                                 />
                             </div>
@@ -262,7 +283,7 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
                                     type="text"
                                     value={routingOrIfsc}
                                     onChange={(e) => setRoutingOrIfsc(e.target.value.toUpperCase())}
-                                    className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono uppercase"
+                                    className="w-full p-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono uppercase"
                                     placeholder={direction === 'US_TO_IN' ? 'HDFC0001234' : '021000021'}
                                 />
                             </div>
@@ -272,8 +293,8 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
 
                 {/* Compliance Fields (India Outbound Only) */}
                 {direction === 'IN_TO_US' && (
-                    <div className="border border-yellow-200 bg-yellow-50 rounded-xl p-5 mb-6">
-                        <h4 className="font-bold text-yellow-900 mb-3 text-sm">Regulatory Requirements (RBI)</h4>
+                    <div className="border border-yellow-200 bg-yellow-50 rounded-xl p-4 mb-4 shrink-0">
+                        <h4 className="font-bold text-yellow-900 mb-2 text-sm">Regulatory Requirements (RBI)</h4>
 
                         <div className="mb-4">
                             <label className="block text-xs font-medium text-yellow-800 mb-1">Purpose Code</label>
@@ -306,21 +327,21 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
                 )}
 
                 {/* Submit Action */}
-                <div className="pt-4 border-t border-slate-100">
-                    <div className="flex justify-between items-center mb-6">
+                <div className="pt-3 border-t border-slate-100 shrink-0">
+                    <div className="flex justify-between items-center mb-4">
                         <div className="text-sm font-bold text-slate-600">Total You Pay</div>
-                        <div className="text-2xl font-black text-[#0A1128]">
-                            {totalYouPay.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-base text-slate-500 font-semibold">{fromCurrency}</span>
+                        <div className="text-xl font-black text-[#0A1128]">
+                            {totalYouPay.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-sm text-slate-500 font-semibold">{fromCurrency}</span>
                         </div>
                     </div>
 
                     <button
                         onClick={handleContinue}
-                        className="w-full bg-[#0A1128] hover:bg-[#15234b] text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
+                        className="w-full bg-[#0A1128] hover:bg-[#15234b] text-white py-3 rounded-xl font-bold text-base shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
                     >
                         Continue to Payment
                     </button>
-                    <p className="text-center text-xs text-slate-400 mt-4">
+                    <p className="text-center text-[10px] text-slate-400 mt-3">
                         By continuing, you agree to our terms of service and exchange rate policy.
                     </p>
                 </div>
