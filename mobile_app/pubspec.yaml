@@ -1,0 +1,35 @@
+name: remittance_app
+description: A new Flutter project for Cross-Border Remittance (NRI to India).
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  flutter_riverpod: ^2.4.9
+  
+  # Routing
+  go_router: ^12.1.1
+  
+  # UI & Styling
+  google_fonts: ^6.1.0
+  cupertino_icons: ^1.0.2
+  
+  # Web3 & Solana
+  solana: ^0.32.0
+  firebase_core: ^4.4.0
+  firebase_auth: ^6.1.4
+  
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
