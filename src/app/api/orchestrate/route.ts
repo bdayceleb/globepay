@@ -50,6 +50,16 @@ export async function POST(request: Request) {
             console.log(`[API] Deducted ${totalPayAmount} from User ${userToDeduct.id}. New Balance = ${newBalance}`);
         }
 
+        // 🚀 Auto-fund: Tell the broker we successfully secured the funds locally via GlobePay / Linked Banks
+        await fetch('http://localhost:4000/webhook/bridge', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                transactionId: brokerData.transactionId,
+                status: 'funded'
+            })
+        });
+
         return NextResponse.json(brokerData);
     } catch (error) {
         console.error("Orchestrator proxy error:", error);

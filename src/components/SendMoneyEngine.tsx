@@ -232,7 +232,7 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
                                     <div className="font-bold text-[#0A1128]">GlobePay Account</div>
                                     <div className="text-sm font-semibold flex items-center space-x-2">
                                         <span className={fiatBalance < totalYouPay ? 'text-red-500' : 'text-emerald-600'}>
-                                            Available: {fiatBalance.toFixed(2)} USD
+                                            Available: ₹ {fiatBalance.toFixed(2)} INR
                                         </span>
                                         {fiatBalance < totalYouPay && (
                                             <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Insufficient</span>
