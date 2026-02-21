@@ -1,22 +1,16 @@
 "use client";
 
-import dynamic from 'next/dynamic';
-import { SendMoney } from '@/components/SendMoney';
-import { ReceiveMoney } from '@/components/ReceiveMoney';
-import { LinkedBanks } from '@/components/LinkedBanks';
-import { ArrowRightLeft, ArrowRight } from 'lucide-react';
+import { RecentTransfers } from '@/components/RecentTransfers';
+import { SendMoneyEngine } from '@/components/SendMoneyEngine';
+import { TransferTracker } from '@/components/TransferTracker';
+import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
-// Avoid hydration mismatch for wallet adapter component
-const WalletMultiButton = dynamic(
-  () => import('@solana/wallet-adapter-react-ui').then((mod) => mod.WalletMultiButton),
-  { ssr: false }
-);
 
 export default function Home() {
   const router = useRouter();
   const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const [transferStatus, setTransferStatus] = useState<any>('idle');
 
   useEffect(() => {
     fetch('/api/auth/user').then(res => res.json()).then(data => {
@@ -56,8 +50,8 @@ export default function Home() {
               </span>
             </div>
             <div className="flex items-center space-x-4">
-              <button onClick={handleLogout} className="text-sm font-bold text-slate-500 hover:text-slate-800 transition">Log out</button>
-              <WalletMultiButton className="!bg-slate-800 hover:!bg-slate-700 !transition !rounded-xl" />
+              <span className="text-sm font-medium text-slate-500 hidden md:block">Profile</span>
+              <button onClick={handleLogout} className="text-sm font-bold text-slate-500 hover:text-[#0A1128] transition bg-slate-100 px-4 py-2 rounded-lg">Log out</button>
             </div>
           </div>
         </div>
@@ -71,48 +65,48 @@ export default function Home() {
           </div>
           <span className="text-lg font-bold text-slate-800">GlobePay</span>
         </div>
-        <WalletMultiButton className="!bg-slate-800 hover:!bg-slate-700 !transition !rounded-lg !px-3 !py-1 flex-shrink-0" />
+        <button onClick={handleLogout} className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg">Log out</button>
       </nav>
 
       {/* Hero Section */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-16">
         <div className="text-center max-w-2xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
-            Global transfers, <span className="text-blue-600">instantly.</span>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-[#0A1128] tracking-tight mb-4">
+            Send Money Globally.
           </h1>
-          <p className="text-lg text-slate-600 mb-8">
-            Send money across borders in seconds with zero hidden fees, powered by Solana's lightning-fast network.
+          <p className="text-lg text-slate-600 mb-8 font-medium">
+            Fast, transparent international transfers with real exchange rates.
           </p>
         </div>
 
         {/* Main Application Area */}
         <div className="flex flex-col lg:flex-row items-stretch justify-center gap-8 mt-12">
 
-          {/* Column 1: Funding & Balances */}
-          <div className="w-full lg:w-1/3 flex justify-center">
-            <LinkedBanks />
+          {/* Column 1: Recent Transfers */}
+          <div className="w-full lg:w-1/4 xl:w-[28%] flex justify-center">
+            <RecentTransfers />
           </div>
 
           <div className="hidden lg:flex flex-col items-center justify-center h-full self-center">
-            <div className="bg-white p-3 rounded-full shadow-sm border border-slate-100 z-10 text-slate-400">
-              <ArrowRight className="w-6 h-6" />
+            <div className="bg-white p-2 rounded-full shadow-sm border border-slate-100 z-10 text-slate-400">
+              <ArrowRight className="w-5 h-5" />
             </div>
           </div>
 
-          {/* Column 2: Send Money (The Tunnel) */}
-          <div className="w-full lg:w-1/3 flex justify-center">
-            <SendMoney />
+          {/* Column 2: Send Money Engine (Primary) */}
+          <div className="w-full lg:w-[45%] xl:w-[40%] flex justify-center">
+            <SendMoneyEngine onStatusChange={setTransferStatus} />
           </div>
 
           <div className="hidden lg:flex flex-col items-center justify-center h-full self-center">
-            <div className="bg-white p-3 rounded-full shadow-sm border border-slate-100 z-10 text-slate-400">
-              <ArrowRightLeft className="w-6 h-6" />
+            <div className="bg-white p-2 rounded-full shadow-sm border border-slate-100 z-10 text-slate-400">
+              <ArrowRight className="w-5 h-5" />
             </div>
           </div>
 
-          {/* Column 3: Receive / Wallets */}
-          <div className="w-full lg:w-1/3 flex justify-center">
-            <ReceiveMoney />
+          {/* Column 3: Transfer Tracker */}
+          <div className="w-full lg:w-1/4 xl:w-[28%] flex justify-center">
+            <TransferTracker status={transferStatus} />
           </div>
 
         </div>

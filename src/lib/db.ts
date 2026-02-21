@@ -36,6 +36,34 @@ export interface User {
     }[];
 }
 
+export interface TransactionDraft {
+    id: string;
+    userId: string;
+    fromCountry: string;
+    toCountry: string;
+    sendCurrency: string;
+    receiveCurrency: string;
+    sendAmount: number;
+    exchangeRate: number;
+    fxSpread: number;
+    serviceFee: number;
+    taxAmount: number;
+    estimatedPayout: number;
+    complianceFields?: {
+        purposeCode?: string;
+        lrsDeclaration?: boolean;
+    };
+    recipientDetails?: {
+        name?: string;
+        accountNumber?: string;
+        ifscCode?: string;
+        routingNumber?: string;
+    };
+    status: 'draft' | 'initiated' | 'funded' | 'converted' | 'completed' | 'failed';
+    updatedAt: number;
+    createdAt: number;
+}
+
 export const db = {
     findUserByEmail: async (email: string): Promise<User | undefined> => {
         console.log(`[DB] Looking up user by email: ${email}`);
@@ -157,6 +185,30 @@ export const db = {
         } catch (e) {
             console.error("Firestore error updating user:", e);
             throw e;
+        }
+    },
+
+    saveDraft: async (draft: TransactionDraft): Promise<void> => {
+        try {
+            await setDoc(doc(firestore, 'transactions', draft.id), draft);
+        } catch (e) {
+            console.error("Firestore error saving draft:", e);
+            throw e;
+        }
+    },
+
+    getUserDrafts: async (userId: string): Promise<TransactionDraft[]> => {
+        try {
+            const q = query(collection(firestore, 'transactions'), where('userId', '==', userId));
+            const qs = await getDocs(q);
+            const drafts: TransactionDraft[] = [];
+            qs.forEach((docSnap) => drafts.push(docSnap.data() as TransactionDraft));
+            // Sort by createdAt descending
+            drafts.sort((a, b) => b.createdAt - a.createdAt);
+            return drafts;
+        } catch (e) {
+            console.error("Firestore error getting drafts:", e);
+            return [];
         }
     }
 };
