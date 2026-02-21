@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
+import { db } from '@/lib/db';
 
 export async function POST(request: Request) {
     try {
@@ -7,7 +8,19 @@ export async function POST(request: Request) {
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const body = await request.json();
-        const { direction, sendAmount, fromCountry, toCountry } = body;
+        const { direction, sendAmount, totalPayAmount, fundingSource, fromCountry, toCountry } = body;
+
+        // Security check: Verify the user actually has enough Firebase cash to fund this.
+        let userToDeduct = null;
+        if (fundingSource === 'globepay-balance') {
+            userToDeduct = await db.findUserById(session.userId);
+            if (!userToDeduct) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+            const currentBalance = userToDeduct.fiatBalance || 0;
+            if (currentBalance < totalPayAmount) {
+                return NextResponse.json({ error: 'Insufficient GlobePay Account Balance.' }, { status: 400 });
+            }
+        }
 
         // Forward this request to our Node.js Global Blockchain Broker running on port 4000
         const mappedDirection = direction === 'US_TO_IN' ? 'US_TO_INDIA' : 'INDIA_TO_US';
@@ -28,6 +41,13 @@ export async function POST(request: Request) {
 
         if (!brokerRes.ok) {
             return NextResponse.json({ error: brokerData.error || 'Broker failed' }, { status: brokerRes.status });
+        }
+
+        // 💰 Deduct the fiat balance from Firebase DB since the broker successfully grabbed the funds
+        if (userToDeduct && fundingSource === 'globepay-balance') {
+            const newBalance = (userToDeduct.fiatBalance || 0) - totalPayAmount;
+            await db.updateUser(userToDeduct.id, { fiatBalance: newBalance });
+            console.log(`[API] Deducted ${totalPayAmount} from User ${userToDeduct.id}. New Balance = ${newBalance}`);
         }
 
         return NextResponse.json(brokerData);

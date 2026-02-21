@@ -13,8 +13,8 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
     const [direction, setDirection] = useState<'US_TO_IN' | 'IN_TO_US' | null>(null);
     const [step, setStep] = useState<'details' | 'payment' | 'success'>('details');
 
-    // Payment States
     const [linkedBanks, setLinkedBanks] = useState<any[]>([]);
+    const [fiatBalance, setFiatBalance] = useState<number>(0);
     const [selectedBankId, setSelectedBankId] = useState<string | null>(null);
     const [otp, setOtp] = useState('');
     const [isPaying, setIsPaying] = useState(false);
@@ -51,10 +51,11 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
         };
         fetchRates();
 
-        // Fetch user banks
+        // Fetch user banks & balance
         fetch('/api/user/funding').then(res => res.json()).then(data => {
-            if (data.success && data.funding?.linkedBanks) {
-                setLinkedBanks(data.funding.linkedBanks);
+            if (data.success) {
+                if (data.fiatBalance !== undefined) setFiatBalance(data.fiatBalance);
+                if (data.linkedBanks) setLinkedBanks(data.linkedBanks);
             }
         });
     }, []);
@@ -166,6 +167,8 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
                 body: JSON.stringify({
                     direction,
                     sendAmount: parsedAmount,
+                    totalPayAmount: totalYouPay,
+                    fundingSource: selectedBankId,
                     fromCountry: direction === 'US_TO_IN' ? 'US' : 'IN',
                     toCountry: direction === 'US_TO_IN' ? 'IN' : 'US'
                 })
@@ -215,32 +218,51 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
                 </div>
                 <div className="p-6 space-y-6">
                     <h3 className="font-bold text-slate-800">Select Funding Source</h3>
-                    {linkedBanks.length === 0 ? (
-                        <div className="p-4 bg-yellow-50 text-yellow-800 rounded-xl text-sm border border-yellow-200">
-                            You have no linked banks. Please go to the left panel to link a bank account first.
-                        </div>
-                    ) : (
-                        <div className="space-y-3">
-                            {linkedBanks.map(bank => (
-                                <div
-                                    key={bank.id}
-                                    onClick={() => setSelectedBankId(bank.id)}
-                                    className={`p-4 border rounded-xl cursor-pointer flex items-center justify-between transition-all ${selectedBankId === bank.id ? 'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500' : 'border-slate-200 hover:border-blue-300'}`}
-                                >
-                                    <div className="flex items-center">
-                                        <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-lg shadow-sm mr-4">
-                                            {bank.bankName === 'HDFC Bank' ? '🏦' : bank.bankName === 'ICICI Bank' ? '🏛️' : '🏦'}
-                                        </div>
-                                        <div>
-                                            <div className="font-bold text-[#0A1128]">{bank.bankName}</div>
-                                            <div className="text-sm text-slate-500 font-mono">•••• {bank.accountNumber?.slice(-4) || 'XXXX'}</div>
-                                        </div>
-                                    </div>
-                                    {selectedBankId === bank.id && <CheckCircle className="text-blue-600 w-5 h-5" />}
+                    <div className="space-y-3">
+                        {/* GlobePay Account Balance (Primary) */}
+                        <div
+                            onClick={() => setSelectedBankId('globepay-balance')}
+                            className={`p-4 border rounded-xl cursor-pointer flex items-center justify-between transition-all ${selectedBankId === 'globepay-balance' ? 'border-amber-500 bg-amber-50/50 ring-1 ring-amber-500' : 'border-slate-200 hover:border-amber-300'}`}
+                        >
+                            <div className="flex flex-1 items-center">
+                                <div className="w-10 h-10 rounded-full bg-[#0A1128] border border-slate-200 flex items-center justify-center text-lg shadow-sm mr-4">
+                                    <span className="text-white">GP</span>
                                 </div>
-                            ))}
+                                <div>
+                                    <div className="font-bold text-[#0A1128]">GlobePay Account</div>
+                                    <div className="text-sm font-semibold flex items-center space-x-2">
+                                        <span className={fiatBalance < totalYouPay ? 'text-red-500' : 'text-emerald-600'}>
+                                            Available: {fiatBalance.toFixed(2)} USD
+                                        </span>
+                                        {fiatBalance < totalYouPay && (
+                                            <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Insufficient</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            {selectedBankId === 'globepay-balance' && <CheckCircle className="text-amber-600 w-5 h-5 shrink-0" />}
                         </div>
-                    )}
+
+                        {/* Linked External Banks */}
+                        {linkedBanks.map(bank => (
+                            <div
+                                key={bank.id}
+                                onClick={() => setSelectedBankId(bank.id)}
+                                className={`p-4 border rounded-xl cursor-pointer flex items-center justify-between transition-all ${selectedBankId === bank.id ? 'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500' : 'border-slate-200 hover:border-blue-300'}`}
+                            >
+                                <div className="flex items-center">
+                                    <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-lg shadow-sm mr-4">
+                                        {bank.bankName === 'HDFC Bank' ? '🏦' : bank.bankName === 'ICICI Bank' ? '🏛️' : '🏦'}
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-[#0A1128]">{bank.bankName}</div>
+                                        <div className="text-sm text-slate-500 font-mono">•••• {bank.accountNumber?.slice(-4) || 'XXXX'}</div>
+                                    </div>
+                                </div>
+                                {selectedBankId === bank.id && <CheckCircle className="text-blue-600 w-5 h-5" />}
+                            </div>
+                        ))}
+                    </div>
 
                     {selectedBankId && (
                         <div className="pt-4 border-t border-slate-100">
@@ -266,8 +288,8 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
                         </button>
                         <button
                             onClick={handleConfirmPayment}
-                            disabled={!selectedBankId || otp.length < 6 || isPaying}
-                            className="flex-1 bg-[#0A1128] hover:bg-[#15234b] text-white py-3 rounded-xl font-bold text-base shadow-lg transition-all disabled:opacity-50 relative"
+                            disabled={!selectedBankId || otp.length < 6 || isPaying || (selectedBankId === 'globepay-balance' && fiatBalance < totalYouPay)}
+                            className="flex-1 bg-[#0A1128] hover:bg-[#15234b] text-white py-3 rounded-xl font-bold text-base shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed relative"
                         >
                             {isPaying ? 'Authorizing...' : `Pay ${totalYouPay.toFixed(2)} ${fromCurrency}`}
                         </button>
