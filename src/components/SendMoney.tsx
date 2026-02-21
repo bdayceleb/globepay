@@ -1,31 +1,21 @@
 "use client";
 
-import { useState } from 'react';
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { PublicKey } from '@solana/web3.js';
-import { convertFiatToMockUSDC, buildTransferTransaction } from '@/lib/web3/utils';
-import { Loader2, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
-
-// For the prototype, we use a fixed mock USDC Devnet mint address
-const MOCK_USDC_MINT = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
+import { useState, useEffect } from 'react';
+import { Loader2, ArrowRight, CheckCircle, AlertCircle, ExternalLink, ShieldCheck, Banknote } from 'lucide-react';
 
 export function SendMoney() {
-    const { connection } = useConnection();
-    const { publicKey, sendTransaction } = useWallet();
-
     const [fiatAmount, setFiatAmount] = useState<string>('');
     const [recipient, setRecipient] = useState<string>('');
 
     const [isProcessing, setIsProcessing] = useState(false);
-    const [status, setStatus] = useState<'idle' | 'converting' | 'transferring' | 'success' | 'error'>('idle');
+    // 4 stages for the demo
+    const [status, setStatus] = useState<'idle' | 'onramp' | 'transit' | 'offramp' | 'success' | 'error'>('idle');
     const [txSignature, setTxSignature] = useState<string | null>(null);
+    const [explorerUrl, setExplorerUrl] = useState<string | null>(null);
+    const [bankReference, setBankReference] = useState<string | null>(null);
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!publicKey) {
-            alert("Please connect your wallet first.");
-            return;
-        }
 
         if (!fiatAmount || isNaN(Number(fiatAmount)) || Number(fiatAmount) <= 0) {
             alert("Please enter a valid amount.");
@@ -34,36 +24,45 @@ export function SendMoney() {
 
         try {
             setIsProcessing(true);
-            setStatus('converting');
 
-            // 1. Simulate Fiat to Crypto On-ramp
-            const usdcAmount = await convertFiatToMockUSDC(Number(fiatAmount));
+            // Step 1: Fiat On-ramp & Solana Transit
+            setStatus('onramp');
+            await new Promise(r => setTimeout(r, 1500)); // Artificial UX delay
 
-            setStatus('transferring');
+            setStatus('transit');
+            const onrampRes = await fetch('/api/tunnel/onramp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: Number(fiatAmount),
+                    currency: 'USD',
+                    destinationAddress: recipient || '11111111111111111111111111111111' // Fallback to System Program 
+                })
+            });
+            const onrampData = await onrampRes.json();
 
-            // 2. Build Transaction
-            const transaction = await buildTransferTransaction(
-                connection,
-                publicKey,
-                recipient,
-                usdcAmount,
-                MOCK_USDC_MINT
-            );
+            if (!onrampData.success) throw new Error("Onramp failed");
 
-            if (!transaction) throw new Error("Failed to build transaction");
+            setTxSignature(onrampData.solanaSignature);
+            setExplorerUrl(onrampData.explorerUrl);
 
-            // 3. Send Transaction via Solana network
-            const signature = await sendTransaction(transaction, connection);
-            console.log('Transaction sent:', signature);
-            setTxSignature(signature);
+            // Step 2: Fiat Off-ramp
+            setStatus('offramp');
+            const offrampRes = await fetch('/api/tunnel/offramp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: Number(fiatAmount) * 83.5, // Mock INR rate
+                    targetCurrency: 'INR',
+                    solanaSignature: onrampData.solanaSignature,
+                    recipientId: recipient
+                })
+            });
+            const offrampData = await offrampRes.json();
 
-            // Await confirmation
-            const latestBlockhash = await connection.getLatestBlockhash();
-            await connection.confirmTransaction({
-                signature,
-                blockhash: latestBlockhash.blockhash,
-                lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
-            }, 'confirmed');
+            if (!offrampData.success) throw new Error("Offramp failed");
+
+            setBankReference(offrampData.localBankReference);
 
             setStatus('success');
         } catch (error: any) {
@@ -75,25 +74,87 @@ export function SendMoney() {
     };
 
     return (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 max-w-md w-full">
-            <h2 className="text-xl font-bold text-slate-800 mb-6">Send Money</h2>
+        <div className="bg-white p-6 sm:p-8 rounded-[24px] shadow-xl border border-slate-100 max-w-md w-full relative z-20">
+            <h2 className="text-2xl font-bold text-[#0A1128] mb-6">Send Money</h2>
 
             {status === 'success' ? (
-                <div className="flex flex-col items-center justify-center p-6 text-center">
-                    <CheckCircle className="w-16 h-16 text-emerald-500 mb-4" />
-                    <h3 className="text-lg font-semibold text-slate-800">Transfer Successful</h3>
-                    <p className="text-sm text-slate-500 mt-2 mb-6">Your money is on its way to the recipient.</p>
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                        <CheckCircle className="w-8 h-8 text-green-500" />
+                    </div>
+                    <h3 className="text-xl font-bold text-[#0A1128]">Transfer Complete</h3>
+                    <p className="text-gray-500 mt-2 mb-6">Funds have arrived in the recipient's bank account via TransFi API.</p>
+
+                    <div className="w-full bg-slate-50 p-4 rounded-xl border border-slate-200 mb-8 space-y-3 text-left">
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-slate-500">Local Bank Ref:</span>
+                            <span className="font-mono font-medium text-slate-800">{bankReference}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-slate-500">Blockchain Receipt:</span>
+                            {explorerUrl && (
+                                <a href={explorerUrl} target="_blank" rel="noopener noreferrer" className="flex items-center text-[#00B9FF] hover:underline font-medium">
+                                    View on Solana <ExternalLink className="w-3 h-3 ml-1" />
+                                </a>
+                            )}
+                        </div>
+                    </div>
+
                     <button
                         onClick={() => {
                             setStatus('idle');
                             setFiatAmount('');
                             setRecipient('');
                             setTxSignature(null);
+                            setExplorerUrl(null);
+                            setBankReference(null);
                         }}
-                        className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition"
+                        className="w-full py-3 bg-[#0A1128] hover:bg-[#15234b] text-white rounded-full font-bold transition"
                     >
                         Send Another
                     </button>
+                </div>
+            ) : isProcessing ? (
+                <div className="py-8">
+                    <div className="space-y-8">
+                        {/* Step 1: On-Ramp */}
+                        <div className={`flex items-start transition-opacity duration-300 ${status === 'onramp' ? 'opacity-100' : 'opacity-40'}`}>
+                            <div className="mt-1 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                                {status === 'onramp' ? <Loader2 className="w-4 h-4 text-blue-600 animate-spin" /> : <Banknote className="w-4 h-4 text-blue-600" />}
+                            </div>
+                            <div className="ml-4">
+                                <h4 className="font-bold text-slate-800">1. Fiat Entry (Bridge API)</h4>
+                                <p className="text-sm text-slate-500">Detecting bank deposit & minting virtual USDC...</p>
+                            </div>
+                        </div>
+
+                        {/* Step 2: Transit */}
+                        <div className={`flex items-start transition-opacity duration-300 ${status === 'transit' ? 'opacity-100' : (status === 'offramp' ? 'opacity-40' : 'opacity-20')}`}>
+                            <div className="mt-1 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                                {status === 'transit' ? <Loader2 className="w-4 h-4 text-indigo-600 animate-spin" /> : <ShieldCheck className="w-4 h-4 text-indigo-600" />}
+                            </div>
+                            <div className="ml-4">
+                                <h4 className="font-bold text-slate-800">2. Solana Engine Transit</h4>
+                                <p className="text-sm text-slate-500">Executing Gasless Transfer on Devnet...</p>
+                                {txSignature && (
+                                    <div className="mt-2 text-xs font-mono text-slate-400 truncate max-w-[200px]">
+                                        Sig: {txSignature}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Step 3: Off-Ramp */}
+                        <div className={`flex items-start transition-opacity duration-300 ${status === 'offramp' ? 'opacity-100' : 'opacity-20'}`}>
+                            <div className="mt-1 w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                <Loader2 className="w-4 h-4 text-emerald-600 animate-spin" />
+                            </div>
+                            <div className="ml-4">
+                                <h4 className="font-bold text-slate-800">3. Fiat Exit (TransFi API)</h4>
+                                <p className="text-sm text-slate-500">Converting USDC to target fiat & triggering local rails...</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             ) : (
                 <form onSubmit={handleSend} className="space-y-4">
@@ -139,19 +200,10 @@ export function SendMoney() {
 
                     <button
                         type="submit"
-                        disabled={isProcessing || !publicKey || !fiatAmount || !recipient}
-                        className="w-full mt-4 flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white py-3 px-4 rounded-xl font-medium transition"
+                        disabled={!fiatAmount || !recipient}
+                        className="w-full mt-6 flex items-center justify-center space-x-2 bg-[#DDF51A] hover:bg-[#c5dc17] disabled:opacity-50 disabled:cursor-not-allowed text-[#0A1128] py-4 rounded-full font-bold text-lg transition"
                     >
-                        {isProcessing ? (
-                            <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                <span>
-                                    {status === 'converting' ? 'Converting via On-ramp...' : 'Processing Transfer...'}
-                                </span>
-                            </>
-                        ) : (
-                            <span>Continue</span>
-                        )}
+                        <span>Start Transfer</span>
                     </button>
                 </form>
             )}
