@@ -95,7 +95,7 @@ export function HeroSection() {
                         transition={{ duration: 0.7, ease: "easeOut" }}
                         className="flex-1 text-center lg:text-left mt-8 lg:mt-0"
                     >
-                        <h1 className="text-5xl sm:text-6xl lg:text-[80px] font-bold text-white tracking-tight leading-[1.05] mb-8">
+                        <h1 className="text-4xl sm:text-6xl lg:text-[80px] font-bold text-white tracking-tight leading-[1.05] mb-6 sm:mb-8">
                             Money without borders.
                         </h1>
                         <p className="text-[22px] text-blue-100 mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light">
@@ -122,33 +122,33 @@ export function HeroSection() {
                         initial={{ opacity: 0, x: 30, scale: 0.95 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
-                        className="w-full max-w-[480px] lg:w-[480px] shrink-0"
+                        className="w-full max-w-[480px] lg:w-[480px] shrink-0 mx-auto"
                     >
-                        <div className="bg-white rounded-[24px] shadow-2xl p-8">
+                        <div className="bg-white rounded-[24px] shadow-2xl p-5 sm:p-8">
 
                             {/* Send Input */}
                             <div className="relative">
                                 <div className="bg-white rounded-xl border border-gray-300 p-4 hover:border-gray-400 transition focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 z-20 relative flex justify-between items-center">
-                                    <div className="flex-1">
-                                        <label className="text-sm font-medium text-gray-500 block mb-1">You send</label>
+                                    <div className="flex-1 min-w-0 pr-2">
+                                        <label className="text-[13px] sm:text-sm font-medium text-gray-500 block mb-1 truncate">You send</label>
                                         <input
                                             type="number"
                                             value={sendAmount}
                                             onChange={(e) => setSendAmount(e.target.value)}
-                                            className="w-full bg-transparent text-3xl font-bold text-[#1A2B4C] outline-none"
+                                            className="w-full bg-transparent text-2xl sm:text-3xl font-bold text-[#1A2B4C] outline-none"
                                         />
                                     </div>
 
                                     <div className="relative" ref={fromRef}>
                                         <div
                                             onClick={() => setIsFromOpen(!isFromOpen)}
-                                            className="flex items-center bg-[#F2F4F7] hover:bg-[#E4E7EC] cursor-pointer px-4 py-3 rounded-xl ml-4 transition"
+                                            className="flex items-center bg-[#F2F4F7] hover:bg-[#E4E7EC] cursor-pointer px-3 sm:px-4 py-3 rounded-xl ml-2 sm:ml-4 transition"
                                         >
-                                            <div className="w-6 h-6 rounded-full overflow-hidden mr-2">
+                                            <div className="hidden sm:block w-6 h-6 rounded-full overflow-hidden mr-2 shrink-0">
                                                 <img src={`https://flagcdn.com/w40/${fromCurrency.flag}.png`} alt="Flag" className="w-full h-full object-cover" />
                                             </div>
-                                            <span className="font-bold text-[#1A2B4C] text-lg mr-2">{fromCurrency.code}</span>
-                                            <ChevronDown className="w-5 h-5 text-gray-500" />
+                                            <span className="font-bold text-[#1A2B4C] text-[15px] sm:text-lg mr-1 sm:mr-2">{fromCurrency.code}</span>
+                                            <ChevronDown className="w-4 sm:w-5 h-4 sm:h-5 text-gray-500 shrink-0" />
                                         </div>
 
                                         <AnimatePresence>
@@ -225,25 +225,25 @@ export function HeroSection() {
                             {/* Receive Output */}
                             <div className="relative">
                                 <div className="bg-[#F9FAFB] rounded-xl border border-gray-300 p-4 flex justify-between items-center z-10 relative">
-                                    <div className="flex-1">
-                                        <label className="text-sm font-medium text-gray-500 block mb-1">Recipient gets</label>
+                                    <div className="flex-1 min-w-0 pr-2">
+                                        <label className="text-[13px] sm:text-sm font-medium text-gray-500 block mb-1 truncate">Recipient gets</label>
                                         <input
                                             disabled
                                             value={receiveAmount}
-                                            className="w-full bg-transparent text-3xl font-bold text-[#1A2B4C] outline-none"
+                                            className="w-full bg-transparent text-2xl sm:text-3xl font-bold text-[#1A2B4C] outline-none truncate"
                                         />
                                     </div>
 
                                     <div className="relative" ref={toRef}>
                                         <div
                                             onClick={() => setIsToOpen(!isToOpen)}
-                                            className="flex items-center bg-[#1A2B4C] hover:bg-[#0A1128] cursor-pointer px-4 py-3 rounded-xl ml-4 transition"
+                                            className="flex items-center bg-[#1A2B4C] hover:bg-[#0A1128] cursor-pointer px-3 sm:px-4 py-3 rounded-xl ml-2 sm:ml-4 transition"
                                         >
-                                            <div className="w-6 h-6 rounded-full overflow-hidden mr-2 flex items-center justify-center bg-white">
+                                            <div className="hidden sm:flex w-6 h-6 rounded-full overflow-hidden mr-2 items-center justify-center bg-white shrink-0">
                                                 <img src={`https://flagcdn.com/w40/${toCurrency.flag}.png`} alt="Flag" className="w-full h-full object-cover" />
                                             </div>
-                                            <span className="font-bold text-white text-lg mr-2">{toCurrency.code}</span>
-                                            <ChevronDown className="w-5 h-5 text-gray-300" />
+                                            <span className="font-bold text-white text-[15px] sm:text-lg mr-1 sm:mr-2">{toCurrency.code}</span>
+                                            <ChevronDown className="w-4 sm:w-5 h-4 sm:h-5 text-gray-300 shrink-0" />
                                         </div>
 
                                         <AnimatePresence>

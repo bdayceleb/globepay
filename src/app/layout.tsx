@@ -6,8 +6,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Cross-Border Remittance App',
-  description: 'Fast, cheap global money transfers via Solana',
+  title: 'GlobePay | Global transfers, instantly.',
+  description: 'Send money home to India quickly, securely, and cheaply.',
 };
 
 export default function RootLayout({
