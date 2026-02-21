@@ -1,6 +1,7 @@
 const prisma = require('../config/db');
 const LedgerLogger = require('./ledgerLogger');
 const BlockchainService = require('./blockchain');
+const firebaseService = require('./firebase');
 
 class TransactionOrchestrator {
     constructor() {
@@ -41,6 +42,9 @@ class TransactionOrchestrator {
             where: { id: transactionId },
             data: { status: targetState, ...eventMetadata.dbUpdates }
         });
+
+        // 1b. Sync state out to Firebase for the live Pitch UI Dashboard
+        await firebaseService.syncTransactionToFirebase(updatedTx);
 
         // 2. Insert ledger event
         await LedgerLogger.logEvent(transactionId, `TRANSITION_TO_${targetState.toUpperCase()}`, {
