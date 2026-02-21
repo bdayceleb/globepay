@@ -15,7 +15,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
         }
 
-        db.updateUser(session.userId, {
+        await db.updateUser(session.userId, {
             isKycComplete: true,
             kycDetails: { fullName, aadharCard, panCard }
         });

@@ -8,7 +8,7 @@ export async function GET() {
         return NextResponse.json({ authenticated: false });
     }
 
-    const user = db.findUserById(session.userId);
+    const user = await db.findUserById(session.userId);
     if (!user) {
         return NextResponse.json({ authenticated: false });
     }

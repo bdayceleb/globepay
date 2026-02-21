@@ -11,7 +11,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
         }
 
-        const existingUser = db.findUserByEmail(email);
+        const existingUser = await db.findUserByEmail(email);
         if (existingUser) {
             return NextResponse.json({ error: 'User already exists' }, { status: 400 });
         }
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
             isKycComplete: false
         };
 
-        db.addUser(newUser);
+        await db.addUser(newUser);
         await createSession(newUser.id);
 
         return NextResponse.json({ success: true, user: { id, email, isKycComplete: false } });

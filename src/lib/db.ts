@@ -1,5 +1,18 @@
-import fs from 'fs';
-import path from 'path';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getFirestore, collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBVeZHjR_TRgK9ZMNa1YOllwDUJY_1OB88",
+    appId: "1:664273233284:web:992e0f1f3c01767ad769d1",
+    messagingSenderId: "664273233284",
+    projectId: "globepay-c6f90",
+    authDomain: "globepay-c6f90.firebaseapp.com",
+    storageBucket: "globepay-c6f90.firebasestorage.app",
+    measurementId: "G-17NLJRJCL5",
+};
+
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const firestore = getFirestore(app);
 
 export interface User {
     id: string;
@@ -13,52 +26,45 @@ export interface User {
     };
 }
 
-const dbPath = path.join(process.cwd(), 'local-auth-db.json');
-
-// Initialize the DB file if it doesn't exist
-if (!fs.existsSync(dbPath)) {
-    fs.writeFileSync(dbPath, JSON.stringify({ users: [] }, null, 2));
-}
-
 export const db = {
-    getUsers: (): User[] => {
+    findUserByEmail: async (email: string): Promise<User | undefined> => {
         try {
-            const data = fs.readFileSync(dbPath, 'utf8');
-            return JSON.parse(data).users;
-        } catch (error) {
-            console.error('Failed to read DB:', error);
-            return [];
+            const q = query(collection(firestore, 'users'), where('email', '==', email));
+            const qs = await getDocs(q);
+            if (qs.empty) return undefined;
+            return qs.docs[0].data() as User;
+        } catch (e) {
+            console.error("Firestore error:", e);
+            return undefined;
         }
     },
 
-    saveUsers: (users: User[]) => {
+    findUserById: async (id: string): Promise<User | undefined> => {
         try {
-            fs.writeFileSync(dbPath, JSON.stringify({ users }, null, 2));
-        } catch (error) {
-            console.error('Failed to write DB:', error);
+            const docSnap = await getDoc(doc(firestore, 'users', id));
+            if (!docSnap.exists()) return undefined;
+            return docSnap.data() as User;
+        } catch (e) {
+            console.error("Firestore error:", e);
+            return undefined;
         }
     },
 
-    findUserByEmail: (email: string): User | undefined => {
-        return db.getUsers().find((u) => u.email === email);
+    addUser: async (user: User): Promise<void> => {
+        try {
+            await setDoc(doc(firestore, 'users', user.id), user);
+        } catch (e) {
+            console.error("Firestore error writing user:", e);
+            throw e;
+        }
     },
 
-    findUserById: (id: string): User | undefined => {
-        return db.getUsers().find((u) => u.id === id);
-    },
-
-    addUser: (user: User) => {
-        const users = db.getUsers();
-        users.push(user);
-        db.saveUsers(users);
-    },
-
-    updateUser: (id: string, updates: Partial<User>) => {
-        const users = db.getUsers();
-        const index = users.findIndex(u => u.id === id);
-        if (index !== -1) {
-            users[index] = { ...users[index], ...updates };
-            db.saveUsers(users);
+    updateUser: async (id: string, updates: Partial<User>): Promise<void> => {
+        try {
+            await updateDoc(doc(firestore, 'users', id), updates);
+        } catch (e) {
+            console.error("Firestore error updating user:", e);
+            throw e;
         }
     }
 };
