@@ -41,6 +41,19 @@ app.post('/transfer', async (req, res) => {
         // 1. Calculate realistic fees
         const quote = await fxEngine.calculateQuote(sendAmount, direction);
 
+        // 1.5 Ensure local User exists to satisfy Foreign Key Constraint (Sync Firebase ID -> Prisma ID)
+        await prisma.user.upsert({
+            where: { id: userId },
+            update: {}, // do nothing if it exists
+            create: {
+                id: userId,
+                name: "GlobePay User",
+                email: `${userId}@globepay.demo`,
+                passwordHash: "demo",
+                country: fromCountry
+            }
+        });
+
         // 2. Draft the transaction in the DB
         const tx = await prisma.transaction.create({
             data: {

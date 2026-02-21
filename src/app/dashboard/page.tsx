@@ -3,6 +3,7 @@
 import { RecentTransfers } from '@/components/RecentTransfers';
 import { SendMoneyEngine } from '@/components/SendMoneyEngine';
 import { TransferTracker } from '@/components/TransferTracker';
+import { LinkedBanks } from '@/components/LinkedBanks';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -85,8 +86,9 @@ export default function Home() {
         {/* Main Application Area */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-10">
 
-          {/* Column 1: Recent Transfers */}
-          <div className="lg:col-span-3 xl:col-span-3">
+          {/* Column 1: Funding and Recent Transfers */}
+          <div className="lg:col-span-3 xl:col-span-3 flex flex-col space-y-6">
+            <LinkedBanks />
             <RecentTransfers />
           </div>
 

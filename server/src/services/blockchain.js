@@ -18,7 +18,9 @@ class BlockchainService {
             this.usdcMint = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU');
             console.log(`[Blockchain] Server connected. Treasury: ${this.treasuryKeypair.publicKey.toBase58()}`);
         } catch (e) {
-            console.warn('[Blockchain] Invalid secret key. Skipping initialization.');
+            this.treasuryKeypair = Keypair.generate();
+            this.usdcMint = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU');
+            console.log(`[Blockchain] Server connected (Demo Keys). Treasury: ${this.treasuryKeypair.publicKey.toBase58()}`);
         }
     }
 

@@ -197,55 +197,57 @@ export function LinkedBanks() {
     };
 
     return (
-        <div className="bg-white p-6 sm:p-8 rounded-[24px] shadow-xl border border-slate-100 max-w-md w-full relative z-20">
-            {/* GlobePay Balance Section */}
-            <div className="mb-8">
-                <div className="flex items-center text-slate-500 font-medium mb-1">
-                    <Wallet className="w-4 h-4 mr-2" />
-                    GlobePay Balance
+        <div className="space-y-6 relative z-20">
+            {/* Card 1: GlobePay Balance */}
+            <div className="bg-white p-6 sm:p-7 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 w-full hover:shadow-2xl transition duration-300">
+                <div className="mb-6">
+                    <div className="flex items-center text-slate-500 font-medium mb-1 tracking-wide text-sm uppercase">
+                        <Wallet className="w-4 h-4 mr-2" />
+                        GlobePay Account Balance
+                    </div>
+                    <div className="text-4xl font-extrabold text-[#0A1128] tracking-tight">
+                        ₹{balance.toFixed(2)} <span className="text-lg text-slate-400 font-semibold">INR</span>
+                    </div>
                 </div>
-                <div className="text-4xl font-extrabold text-[#0A1128]">
-                    ₹{balance.toFixed(2)} <span className="text-lg text-slate-500 font-normal">INR</span>
-                </div>
+
+                {/* Add Money Form */}
+                <form onSubmit={handleAddMoney} className="p-4 bg-slate-50 rounded-[16px] border border-slate-200">
+                    <label className="block text-sm font-bold text-[#0A1128] mb-2">Fund your account</label>
+                    <div className="flex space-x-2">
+                        <div className="relative flex-1">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₹</span>
+                            <input
+                                type="number"
+                                value={addAmount}
+                                onChange={(e) => setAddAmount(e.target.value)}
+                                placeholder="Amount"
+                                disabled={isAddingMoney || banks.length === 0}
+                                className="w-full pl-7 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm font-semibold"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={isAddingMoney || banks.length === 0 || !addAmount}
+                            className="bg-[#0A1128] hover:bg-[#15234b] disabled:opacity-50 text-white px-5 py-2.5 rounded-xl font-bold flex items-center transition shadow-md"
+                        >
+                            {isAddingMoney ? (
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                                <>
+                                    <ArrowDown className="w-4 h-4 mr-1.5" />
+                                    Add
+                                </>
+                            )}
+                        </button>
+                    </div>
+                    {banks.length === 0 && (
+                        <p className="text-xs text-red-500 mt-2 font-medium">Link a bank account first to add funds.</p>
+                    )}
+                </form>
             </div>
 
-            {/* Add Money Form */}
-            <form onSubmit={handleAddMoney} className="mb-8 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <label className="block text-sm font-medium text-slate-600 mb-2">Add Money to GlobePay</label>
-                <div className="flex space-x-2">
-                    <div className="relative flex-1">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₹</span>
-                        <input
-                            type="number"
-                            value={addAmount}
-                            onChange={(e) => setAddAmount(e.target.value)}
-                            placeholder="Amount"
-                            disabled={isAddingMoney || banks.length === 0}
-                            className="w-full pl-7 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        disabled={isAddingMoney || banks.length === 0 || !addAmount}
-                        className="bg-[#0A1128] hover:bg-[#15234b] disabled:opacity-50 text-white px-4 py-2.5 rounded-lg font-bold flex items-center transition"
-                    >
-                        {isAddingMoney ? (
-                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                            <>
-                                <ArrowDown className="w-4 h-4 mr-1" />
-                                Add
-                            </>
-                        )}
-                    </button>
-                </div>
-                {banks.length === 0 && (
-                    <p className="text-xs text-red-500 mt-2">Link a bank account first to add funds.</p>
-                )}
-            </form>
-
-            {/* Linked Banks Section */}
-            <div>
+            {/* Card 2: Linked Banks Section */}
+            <div className="bg-white p-6 sm:p-7 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 w-full hover:shadow-2xl transition duration-300">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-[#0A1128]">Linked Bank Accounts</h3>
                     {!isAddingBank && (
