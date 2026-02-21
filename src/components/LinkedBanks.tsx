@@ -6,6 +6,7 @@ import { Building2, Plus, PlusCircle, Trash2, Wallet, ArrowDown, Eye, CheckCircl
 interface BankAccount {
     id: string;
     bankName: string;
+    icon: string;
     accountNumber: string;
     ifscCode: string;
     isDefault: boolean;
@@ -16,7 +17,7 @@ interface BankAccount {
 export function LinkedBanks() {
     const [balance, setBalance] = useState<number>(0);
     const [banks, setBanks] = useState<BankAccount[]>([
-        { id: '1', bankName: 'HDFC Bank', accountNumber: '00000012345', ifscCode: 'HDFC0001234', isDefault: true, balanceVisible: false, mockBalance: 82500 },
+        { id: '1', bankName: 'HDFC Bank', icon: '🏦', accountNumber: '000000123456789', ifscCode: 'HDFC0001234', isDefault: true, balanceVisible: false, mockBalance: 82500 },
     ]);
 
     // Form States
@@ -34,18 +35,18 @@ export function LinkedBanks() {
     const [addAmount, setAddAmount] = useState('');
 
     const IND_BANKS = [
-        'State Bank of India (SBI)',
-        'HDFC Bank',
-        'ICICI Bank',
-        'Axis Bank',
-        'Kotak Mahindra Bank',
-        'Punjab National Bank'
+        { name: 'State Bank of India (SBI)', icon: '🏛️' },
+        { name: 'HDFC Bank', icon: '🏦' },
+        { name: 'ICICI Bank', icon: '🏢' },
+        { name: 'Axis Bank', icon: '🏧' },
+        { name: 'Kotak Mahindra Bank', icon: '🏦' },
+        { name: 'Punjab National Bank', icon: '🏛️' }
     ];
 
     const startAddBank = () => {
         setIsAddingBank(true);
         setAddStep(1);
-        setNewBankName(IND_BANKS[0]);
+        setNewBankName(IND_BANKS[0].name);
         setNewAccNum('');
         setConfirmAccNum('');
         setNewIfsc('');
@@ -60,8 +61,8 @@ export function LinkedBanks() {
             setLinkError("Account numbers do not match.");
             return;
         }
-        if (newAccNum.length < 9) {
-            setLinkError("Invalid Account Number.");
+        if (!/^\d{15}$/.test(newAccNum)) {
+            setLinkError("Invalid Account Number. Must be exactly 15 digits.");
             return;
         }
         if (newIfsc.length !== 11) {
@@ -81,9 +82,11 @@ export function LinkedBanks() {
 
         setIsLinking(true);
         setTimeout(() => {
+            const selectedBank = IND_BANKS.find(b => b.name === newBankName);
             const newBank: BankAccount = {
                 id: Date.now().toString(),
                 bankName: newBankName,
+                icon: selectedBank?.icon || '🏦',
                 accountNumber: newAccNum,
                 ifscCode: newIfsc,
                 isDefault: banks.length === 0,
@@ -193,16 +196,38 @@ export function LinkedBanks() {
                                         onChange={(e) => setNewBankName(e.target.value)}
                                         className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white outline-none focus:border-blue-500"
                                     >
-                                        {IND_BANKS.map(b => <option key={b} value={b}>{b}</option>)}
+                                        {IND_BANKS.map(b => <option key={b.name} value={b.name}>{b.icon} {b.name}</option>)}
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-slate-500 mb-1">Account Number</label>
-                                    <input type="password" required value={newAccNum} onChange={e => setNewAccNum(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-blue-500" placeholder="Enter bank account number" />
+                                    <label className="block text-xs text-slate-500 mb-1">Account Number (15 Digits)</label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={newAccNum}
+                                        onChange={e => {
+                                            const val = e.target.value.replace(/\D/g, ''); // Only allow digits
+                                            if (val.length <= 15) setNewAccNum(val);
+                                        }}
+                                        maxLength={15}
+                                        className="w-full p-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-blue-500 font-mono"
+                                        placeholder="Enter 15 digit account number"
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-xs text-slate-500 mb-1">Confirm Account Number</label>
-                                    <input type="text" required value={confirmAccNum} onChange={e => setConfirmAccNum(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-blue-500" placeholder="Re-enter bank account number" />
+                                    <input
+                                        type="text"
+                                        required
+                                        value={confirmAccNum}
+                                        onChange={e => {
+                                            const val = e.target.value.replace(/\D/g, '');
+                                            if (val.length <= 15) setConfirmAccNum(val);
+                                        }}
+                                        maxLength={15}
+                                        className="w-full p-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-blue-500 font-mono"
+                                        placeholder="Re-enter 15 digit account number"
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-xs text-slate-500 mb-1">IFSC Code</label>
@@ -243,8 +268,8 @@ export function LinkedBanks() {
                                 <div key={bank.id} className="p-3 border border-slate-200 rounded-xl hover:border-slate-300 transition bg-white relative group">
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center">
-                                            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mr-3 text-slate-600">
-                                                <Building2 className="w-5 h-5" />
+                                            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mr-3 text-xl">
+                                                {bank.icon}
                                             </div>
                                             <div>
                                                 <div className="font-bold text-[#0A1128] text-sm">{bank.bankName}</div>
