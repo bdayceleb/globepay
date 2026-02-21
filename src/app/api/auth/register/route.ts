@@ -21,17 +21,19 @@ export async function POST(request: Request) {
         }
 
         const salt = bcrypt.genSaltSync(10);
-        const passwordHash = bcrypt.hashSync(password, salt);
+        const hashedPassword = bcrypt.hashSync(password, salt);
 
         // Generate a simple ID
         const id = Date.now().toString(36) + Math.random().toString(36).substr(2);
 
         const newUser = {
-            id,
-            email,
-            phone,
-            passwordHash,
-            isKycComplete: false
+            id: Date.now().toString(),
+            email: email.toLowerCase(),
+            phone: phone,
+            passwordHash: hashedPassword,
+            isKycComplete: false,
+            fiatBalance: 0,
+            linkedBanks: []
         };
 
         console.log("[API] Adding user to DB...");
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
         await createSession(newUser.id);
 
         console.log("[API] Registration successful");
-        return NextResponse.json({ success: true, user: { id, email, isKycComplete: false } });
+        return NextResponse.json({ success: true, user: { id: newUser.id, email: newUser.email, isKycComplete: false } });
     } catch (error) {
         console.error("[API] Registration error:", error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
