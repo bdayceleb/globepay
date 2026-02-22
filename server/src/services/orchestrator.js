@@ -65,51 +65,63 @@ class TransactionOrchestrator {
      */
     async _handleSideEffects(tx, state) {
         if (state === 'funded') {
-            console.log(`[Orchestrator] TX ${tx.id} funded. Generating USDC Conversion Event.`);
-            // Simulate 500ms delay to make the terminal logs look authentic during pitch
-            setTimeout(() => this.advanceState(tx.id, 'converted_to_usdc'), 500);
+            console.log(`\n[Orchestrator] ⏱️  TX ${tx.id} funded by user. Securing Exchange Rate...`);
+            setTimeout(() => this.advanceState(tx.id, 'converted_to_usdc'), 1500);
         }
 
         if (state === 'converted_to_usdc') {
-            console.log(`[Orchestrator] TX ${tx.id} converted. Hashing memo and dispatching to Solana.`);
+            console.log(`[Orchestrator] ⏱️  Converted INR to USDC. Hashing KYC and preparing Solana payload...`);
 
-            // Build the memo hash payload
-            const memoHash = BlockchainService.generateMemoHash(
-                tx.id,
-                tx.user ? (tx.user.kycHash || 'unverified') : 'unverified',
-                tx.direction,
-                tx.exchangeRate
-            );
-
-            // Broadcast to devnet (or simulate heavily)
-            try {
-                // Determine dummy destination wallet
-                const destAddress = '8X5WeAx5p26EBSB3m2X2ZtdzBXV4mRkmb9L1rY2Qp1nN';
-
-                const onChainResult = await BlockchainService.simulateUsdcTransfer(
-                    tx.sendAmount, // Using flat amount for demo
-                    destAddress,
-                    memoHash
+            setTimeout(async () => {
+                const memoHash = BlockchainService.generateMemoHash(
+                    tx.id,
+                    tx.user ? (tx.user.kycHash || 'unverified') : 'unverified',
+                    tx.direction,
+                    tx.exchangeRate
                 );
 
-                await this.advanceState(tx.id, 'broadcasted_to_solana', {
-                    dbUpdates: {
-                        blockchainTxHash: onChainResult.signature,
-                        blockchainMemoHash: memoHash
-                    },
-                    ledgerPayload: {
-                        memoHash,
-                        explorerUrl: onChainResult.explorerUrl,
-                        blockHeight: onChainResult.blockHeight
-                    }
-                });
+                try {
+                    const destAddress = '8X5WeAx5p26EBSB3m2X2ZtdzBXV4mRkmb9L1rY2Qp1nN';
+                    const onChainResult = await BlockchainService.simulateUsdcTransfer(
+                        tx.sendAmount,
+                        destAddress,
+                        memoHash
+                    );
 
-                // Auto-progress to confirmed for speed in demo
-                setTimeout(() => this.advanceState(tx.id, 'confirmed_on_chain'), 1000);
+                    await this.advanceState(tx.id, 'broadcasted_to_solana', {
+                        dbUpdates: {
+                            blockchainTxHash: onChainResult.signature,
+                            blockchainMemoHash: memoHash
+                        },
+                        ledgerPayload: {
+                            memoHash,
+                            explorerUrl: onChainResult.explorerUrl,
+                            blockHeight: onChainResult.blockHeight
+                        }
+                    });
+                } catch (err) {
+                    console.error(`[Orchestrator] Onchain failure for TX ${tx.id}`, err);
+                }
+            }, 2000);
+        }
 
-            } catch (err) {
-                console.error(`[Orchestrator] Onchain failure for TX ${tx.id}`, err);
-            }
+        if (state === 'broadcasted_to_solana') {
+            console.log(`[Orchestrator] ⏱️  Transaction broadcasted. Awaiting network confirmation...`);
+            setTimeout(() => this.advanceState(tx.id, 'confirmed_on_chain'), 2500);
+        }
+
+        if (state === 'confirmed_on_chain') {
+            console.log(`[Orchestrator] ⏱️  Solana block confirmed. Engaging Off-Ramp partner...`);
+            setTimeout(() => this.advanceState(tx.id, 'off_ramp_processing'), 1500);
+        }
+
+        if (state === 'off_ramp_processing') {
+            console.log(`[Orchestrator] ⏱️  Off-Ramp partner acknowledged. Delivering funds to recipient bank...`);
+            setTimeout(() => this.advanceState(tx.id, 'completed'), 1500);
+        }
+
+        if (state === 'completed') {
+            console.log(`[Orchestrator] 🎉  TX ${tx.id} fully completed and settled!\n`);
         }
     }
 }

@@ -50,8 +50,12 @@ export async function POST(request: Request) {
             console.log(`[API] Deducted ${totalPayAmount} from User ${userToDeduct.id}. New Balance = ${newBalance}`);
         }
 
+        // Add a deliberate 1.5s delay before firing the webhook.
+        // This gives SQLite time to breathe and allows the UI to show the initial loading state.
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
         // 🚀 Auto-fund: Tell the broker we successfully secured the funds locally via GlobePay / Linked Banks
-        await fetch('http://localhost:4000/webhook/bridge', {
+        await fetch('http://127.0.0.1:4000/webhook/bridge', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
