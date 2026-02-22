@@ -4,9 +4,10 @@ import { CheckCircle, Circle, Clock } from 'lucide-react';
 
 interface TransferTrackerProps {
     status: 'idle' | 'draft' | 'initiated' | 'processing' | 'funded' | 'converted_to_usdc' | 'broadcasted_to_solana' | 'confirmed_on_chain' | 'off_ramp_processing' | 'completed' | 'failed';
+    embedded?: boolean;
 }
 
-export function TransferTracker({ status }: TransferTrackerProps) {
+export function TransferTracker({ status, embedded }: TransferTrackerProps) {
 
     // Ordered steps for the vertical timeline
     const steps = [
@@ -28,7 +29,7 @@ export function TransferTracker({ status }: TransferTrackerProps) {
     const currentIndex = getProgressIndex();
 
     return (
-        <div className="relative bg-white/90 backdrop-blur-2xl p-6 sm:p-7 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 w-full hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)] transition-all duration-500 overflow-hidden sticky top-24">
+        <div className={embedded ? "p-6 sm:p-7 w-full h-full" : "relative bg-white/90 backdrop-blur-2xl p-6 sm:p-7 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 w-full hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)] transition-all duration-500 overflow-hidden sticky top-24"}>
             <h3 className="text-xl font-extrabold text-[#0A1128] mb-8 relative z-10 tracking-tight">Transfer Status</h3>
 
             {status === 'idle' || status === 'draft' ? (

@@ -2,7 +2,6 @@
 
 import { RecentTransfers } from '@/components/RecentTransfers';
 import { SendMoneyEngine } from '@/components/SendMoneyEngine';
-import { TransferTracker } from '@/components/TransferTracker';
 import { LinkedBanks } from '@/components/LinkedBanks';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -133,14 +132,13 @@ export default function Home() {
 
           {/* Main Action Area (Left) */}
           <div className="w-full lg:w-7/12 flex flex-col space-y-8">
-            <SendMoneyEngine onStatusChange={setTransferStatus} />
+            <SendMoneyEngine status={transferStatus} onStatusChange={setTransferStatus} />
             <RecentTransfers transfers={transfers} isLoading={isTransfersLoading} />
           </div>
 
-          {/* Wallet & Tracking Sidebar (Right) */}
+          {/* Wallet Sidebar (Right) */}
           <div className="w-full lg:w-5/12 flex flex-col space-y-8 sticky top-24">
             <LinkedBanks />
-            <TransferTracker status={transferStatus} />
           </div>
 
         </div>

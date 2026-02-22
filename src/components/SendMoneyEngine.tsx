@@ -3,12 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ArrowRight, ChevronDown, CheckCircle, Info, Building2 } from 'lucide-react';
 import { TransactionDraft } from '@/lib/db';
+import { TransferTracker } from '@/components/TransferTracker';
 
 interface SendMoneyEngineProps {
+    status: 'idle' | 'draft' | 'initiated' | 'processing' | 'funded' | 'converted_to_usdc' | 'broadcasted_to_solana' | 'confirmed_on_chain' | 'off_ramp_processing' | 'completed' | 'failed';
     onStatusChange: (status: 'idle' | 'draft' | 'initiated' | 'processing' | 'funded' | 'converted_to_usdc' | 'broadcasted_to_solana' | 'confirmed_on_chain' | 'off_ramp_processing' | 'completed' | 'failed') => void;
 }
 
-export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
+export function SendMoneyEngine({ status, onStatusChange }: SendMoneyEngineProps) {
     const [draftId, setDraftId] = useState<string | null>(null);
     const [direction, setDirection] = useState<'US_TO_IN' | 'IN_TO_US' | null>(null);
     const [step, setStep] = useState<'details' | 'payment' | 'success'>('details');
@@ -59,6 +61,13 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
             }
         });
     }, []);
+
+    // Auto-detect if user refreshes mid-transfer and surface the status tracker
+    useEffect(() => {
+        if (step === 'details' && status !== 'idle' && status !== 'draft' && status !== 'completed' && status !== 'failed') {
+            setStep('success');
+        }
+    }, [status, step]);
 
     // Dynamic Constants
     // Dynamic Constants
@@ -140,18 +149,16 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
 
     if (step === 'success') {
         return (
-            <div className="bg-white rounded-[20px] shadow-xl border border-slate-100 p-8 text-center flex flex-col items-center justify-center min-h-[400px]">
-                <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
-                    <CheckCircle className="w-8 h-8" />
+            <div className="relative bg-white/90 backdrop-blur-2xl rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/60 w-full flex flex-col transition-all duration-500 hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)] overflow-hidden">
+                <TransferTracker status={status} embedded={true} />
+                <div className="px-7 pb-7 pt-2 mt-[-1rem]">
+                    <button
+                        onClick={() => { setStep('details'); setDirection(null); onStatusChange('idle'); }}
+                        className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3.5 rounded-xl transition"
+                    >
+                        Start another transfer
+                    </button>
                 </div>
-                <h2 className="text-2xl font-bold text-[#0A1128] mb-2">Transfer Initiated!</h2>
-                <p className="text-slate-500 mb-6">Your funds are now securely moving through the digital tunnel.</p>
-                <button
-                    onClick={() => { setStep('details'); setDirection(null); onStatusChange('idle'); }}
-                    className="text-blue-600 font-bold hover:underline"
-                >
-                    Start another transfer
-                </button>
             </div>
         );
     }
