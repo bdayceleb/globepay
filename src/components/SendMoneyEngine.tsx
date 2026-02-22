@@ -80,60 +80,7 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
     const totalYouPay = parsedAmount + serviceFee + taxAmount;
     const recipientGets = parsedAmount * ourRate;
 
-    // Auto-save debouncer
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            saveDraft();
-        }, 1000); // 1s debounce
-        return () => clearTimeout(handler);
-    }, [direction, sendAmount, recipientName, accountNumber, routingOrIfsc, purposeCode, lrsChecked]);
-
-    const saveDraft = async () => {
-        if (!parsedAmount) return;
-
-        const draft: Partial<TransactionDraft> = {
-            ...(draftId && { id: draftId }),
-            fromCountry: direction === 'US_TO_IN' ? 'US' : 'IN',
-            toCountry: direction === 'US_TO_IN' ? 'IN' : 'US',
-            sendCurrency: fromCurrency,
-            receiveCurrency: toCurrency,
-            sendAmount: parsedAmount,
-            exchangeRate: ourRate,
-            fxSpread: fxProfit,
-            serviceFee: serviceFee,
-            taxAmount: taxAmount,
-            estimatedPayout: recipientGets,
-            status: 'draft',
-            recipientDetails: {
-                name: recipientName,
-                accountNumber: accountNumber,
-                ifscCode: direction === 'US_TO_IN' ? routingOrIfsc : undefined,
-                routingNumber: direction === 'IN_TO_US' ? routingOrIfsc : undefined
-            },
-            ...(direction === 'IN_TO_US' && {
-                complianceFields: {
-                    purposeCode,
-                    lrsDeclaration: lrsChecked
-                }
-            })
-        };
-
-        try {
-            const res = await fetch('/api/transactions/draft', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(draft)
-            });
-            const data = await res.json();
-            if (data.success && !draftId && direction) {
-                setDraftId(data.draft.id);
-                // only notify draft status if we are completely in the details step
-                if (step === 'details') onStatusChange('draft');
-            }
-        } catch (error) {
-            console.error('Failed to save draft:', error);
-        }
-    };
+    // Draft auto-saving has been intentionally removed per user request to keep Firebase transactions pristine.
 
     const handleContinue = () => {
         if (direction === 'IN_TO_US' && !lrsChecked) {

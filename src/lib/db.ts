@@ -201,11 +201,17 @@ export const db = {
         try {
             const q = query(collection(firestore, 'transactions'), where('userId', '==', userId));
             const qs = await getDocs(q);
-            const drafts: TransactionDraft[] = [];
-            qs.forEach((docSnap) => drafts.push(docSnap.data() as TransactionDraft));
+            const transactions: TransactionDraft[] = [];
+            qs.forEach((docSnap) => {
+                const data = docSnap.data() as TransactionDraft;
+                // Strict Firebase Filter: Completely ignore any legacy 'draft' entries so the UI stays clean.
+                if (data.status !== 'draft') {
+                    transactions.push(data);
+                }
+            });
             // Sort by createdAt descending
-            drafts.sort((a, b) => b.createdAt - a.createdAt);
-            return drafts;
+            transactions.sort((a, b) => b.createdAt - a.createdAt);
+            return transactions;
         } catch (e) {
             console.error("Firestore error getting drafts:", e);
             return [];
