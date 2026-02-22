@@ -14,7 +14,7 @@ export async function GET() {
             success: true,
             fiatBalance: user.fiatBalance || 0,
             linkedBanks: user.linkedBanks || [],
-            countryCode: user.countryCode || '+1'
+            countryCode: user.countryCode || '+91'
         });
     } catch (error) {
         console.error("Fetch Funding Data Error:", error);

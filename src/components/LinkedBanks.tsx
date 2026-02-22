@@ -21,7 +21,7 @@ export function LinkedBanks() {
     ]);
 
     // Form States
-    const [countryCode, setCountryCode] = useState<string>('+1');
+    const [countryCode, setCountryCode] = useState<string>('+91');
     const [isAddingBank, setIsAddingBank] = useState(false);
     const [addStep, setAddStep] = useState<1 | 2>(1); // 1: Details, 2: OTP
     const [newBankName, setNewBankName] = useState('State Bank of India (SBI)');
@@ -46,7 +46,7 @@ export function LinkedBanks() {
                     const data = await res.json();
                     if (data.success) {
                         setBalance(data.fiatBalance || 0);
-                        setCountryCode(data.countryCode || '+1');
+                        setCountryCode(data.countryCode || '+91');
                         // Ensure legacy banks without mockBalance get one
                         const mappedBanks = (data.linkedBanks || []).map((b: any) => ({
                             ...b,
