@@ -232,7 +232,6 @@ export default function RegisterPage() {
                     <form onSubmit={handleVerifyAndRegister} className="space-y-6">
                         <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm mb-6">
                             We've sent a 6-digit code to both your email and phone number.
-                            <br /><span className="font-bold opacity-75">(Demo Tip: Enter '123456')</span>
                         </div>
 
                         <div>

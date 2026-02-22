@@ -19,6 +19,7 @@ export async function GET() {
             id: user.id,
             email: user.email,
             phone: user.phone,
+            countryCode: user.countryCode,
             isKycComplete: user.isKycComplete,
             kycDetails: user.kycDetails,
             fiatBalance: user.fiatBalance

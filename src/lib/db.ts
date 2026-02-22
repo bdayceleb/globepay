@@ -19,7 +19,9 @@ export interface User {
     id: string;
     email: string; // Stored encrypted
     phone?: string; // Stored encrypted
+    countryCode?: string;
     passwordHash: string;
+    kycData?: any; // Dynamic storage for Country-Specific identity documents
     isKycComplete: boolean;
     kycDetails?: {
         aadharCard: string;
@@ -89,13 +91,8 @@ export const db = {
                         ...rawUser,
                         email: decryptedEmail,
                         phone: rawUser.phone ? decryptData(rawUser.phone) : undefined,
-                        ...(rawUser.kycDetails && {
-                            kycDetails: {
-                                aadharCard: decryptData(rawUser.kycDetails.aadharCard),
-                                panCard: decryptData(rawUser.kycDetails.panCard),
-                                fullName: decryptData(rawUser.kycDetails.fullName),
-                            }
-                        }),
+                        countryCode: rawUser.countryCode,
+                        kycData: rawUser.kycData,
                         fiatBalance: rawUser.fiatBalance || 0,
                         linkedBanks: (rawUser.linkedBanks || []).map(bank => ({
                             ...bank,
@@ -126,13 +123,8 @@ export const db = {
                 ...rawUser,
                 email: decryptData(rawUser.email),
                 phone: rawUser.phone ? decryptData(rawUser.phone) : undefined,
-                ...(rawUser.kycDetails && {
-                    kycDetails: {
-                        aadharCard: decryptData(rawUser.kycDetails.aadharCard),
-                        panCard: decryptData(rawUser.kycDetails.panCard),
-                        fullName: decryptData(rawUser.kycDetails.fullName),
-                    }
-                }),
+                countryCode: rawUser.countryCode,
+                kycData: rawUser.kycData,
                 fiatBalance: rawUser.fiatBalance || 0,
                 linkedBanks: (rawUser.linkedBanks || []).map(bank => ({
                     ...bank,
