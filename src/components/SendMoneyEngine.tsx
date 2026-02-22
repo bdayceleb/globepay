@@ -91,7 +91,7 @@ export function SendMoneyEngine({ status, onStatusChange }: SendMoneyEngineProps
 
     // Draft auto-saving has been intentionally removed per user request to keep Firebase transactions pristine.
 
-    const handleContinue = () => {
+    const handleContinue = async () => {
         if (direction === 'IN_TO_US' && !lrsChecked) {
             alert("You must agree to the LRS deceleration.");
             return;
@@ -100,6 +100,19 @@ export function SendMoneyEngine({ status, onStatusChange }: SendMoneyEngineProps
             alert("Please fill in all recipient details.");
             return;
         }
+
+        // Fetch latest funding sources before showing payment screen to ensure newly linked banks are visible
+        try {
+            const res = await fetch('/api/user/funding');
+            const data = await res.json();
+            if (data.success) {
+                if (data.fiatBalance !== undefined) setFiatBalance(data.fiatBalance);
+                if (data.linkedBanks) setLinkedBanks(data.linkedBanks);
+            }
+        } catch (e) {
+            console.error("Failed to refresh funding sources", e);
+        }
+
         setStep('payment');
     };
 
@@ -212,7 +225,7 @@ export function SendMoneyEngine({ status, onStatusChange }: SendMoneyEngineProps
                             >
                                 <div className="flex items-center">
                                     <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-lg shadow-sm mr-4">
-                                        {bank.bankName === 'HDFC Bank' ? '🏦' : bank.bankName === 'ICICI Bank' ? '🏛️' : '🏦'}
+                                        {bank.icon || '🏦'}
                                     </div>
                                     <div>
                                         <div className="font-bold text-[#0A1128]">{bank.bankName}</div>
