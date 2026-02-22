@@ -122,6 +122,32 @@ class TransactionOrchestrator {
 
         if (state === 'completed') {
             console.log(`[Orchestrator] 🎉  TX ${tx.id} fully completed and settled!\n`);
+
+            // Check if this transaction was routed to an existing user's Linked Bank Account based on the account number
+            if (tx.recipientAccount) {
+                console.log(`[Orchestrator] 🔍  Checking if recipient ${tx.recipientAccount} is a known internal wallet...`);
+                try {
+                    // Make an internal HTTP webhook call to the Next.js Frontend server to check the AES-encrypted user db
+                    // (Assuming Next.js dev server runs on localhost:3000 locally)
+                    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+                    const res = await fetch(`${appUrl}/api/webhooks/internal-transfer`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            recipientAccount: tx.recipientAccount,
+                            amount: tx.estimatedPayout
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        console.log(`[Orchestrator] 🟢  Internal routing successful! Bypassed off-ramp and credited User ${data.user} with ${tx.estimatedPayout}.`);
+                    } else {
+                        console.log(`[Orchestrator] ⚪  Recipient not recognized internally. Processed as standard external wire.`);
+                    }
+                } catch (e) {
+                    console.error('[Orchestrator] 🔴 Failed to ping internal router webhook', e);
+                }
+            }
         }
     }
 }

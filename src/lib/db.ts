@@ -137,6 +137,42 @@ export const db = {
         }
     },
 
+    findUserByAccountNumber: async (accountNumber: string): Promise<User | undefined> => {
+        try {
+            const qs = await getDocs(collection(firestore, 'users'));
+            let matchedUser: User | undefined;
+
+            qs.forEach((docSnap) => {
+                if (matchedUser) return;
+                const rawUser = docSnap.data() as User;
+                if (!rawUser.linkedBanks) return;
+
+                for (const bank of rawUser.linkedBanks) {
+                    const decryptedAccount = decryptData(bank.accountNumber);
+                    if (decryptedAccount === accountNumber) {
+                        matchedUser = {
+                            ...rawUser,
+                            email: decryptData(rawUser.email),
+                            phone: rawUser.phone ? decryptData(rawUser.phone) : undefined,
+                            countryCode: rawUser.countryCode,
+                            kycData: rawUser.kycData,
+                            fiatBalance: rawUser.fiatBalance || 0,
+                            linkedBanks: rawUser.linkedBanks.map(b => ({
+                                ...b,
+                                accountNumber: decryptData(b.accountNumber)
+                            }))
+                        };
+                        break;
+                    }
+                }
+            });
+            return matchedUser;
+        } catch (e) {
+            console.error("Firestore error:", e);
+            return undefined;
+        }
+    },
+
     addUser: async (user: User): Promise<void> => {
         console.log(`[DB] Adding new user: ${user.email} (${user.id})`);
 
