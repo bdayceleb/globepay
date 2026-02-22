@@ -21,6 +21,7 @@ export function LinkedBanks() {
     ]);
 
     // Form States
+    const [countryCode, setCountryCode] = useState<string>('+1');
     const [isAddingBank, setIsAddingBank] = useState(false);
     const [addStep, setAddStep] = useState<1 | 2>(1); // 1: Details, 2: OTP
     const [newBankName, setNewBankName] = useState('State Bank of India (SBI)');
@@ -45,6 +46,7 @@ export function LinkedBanks() {
                     const data = await res.json();
                     if (data.success) {
                         setBalance(data.fiatBalance || 0);
+                        setCountryCode(data.countryCode || '+1');
                         // Ensure legacy banks without mockBalance get one
                         const mappedBanks = (data.linkedBanks || []).map((b: any) => ({
                             ...b,
@@ -72,10 +74,26 @@ export function LinkedBanks() {
         { name: 'Punjab National Bank', icon: '🏛️' }
     ];
 
+    const US_BANKS = [
+        { name: 'JPMorgan Chase', icon: '🏛️' },
+        { name: 'Bank of America', icon: '🏦' },
+        { name: 'Wells Fargo', icon: '🏧' },
+        { name: 'Citibank', icon: '🏢' },
+        { name: 'U.S. Bank', icon: '🏦' }
+    ];
+
+    const GLOBAL_BANKS = [
+        { name: 'HSBC', icon: '🏦' },
+        { name: 'Barclays', icon: '🏛️' },
+        { name: 'Standard Chartered', icon: '🏢' }
+    ];
+
+    const AVAILABLE_BANKS = countryCode === '+91' ? IND_BANKS : countryCode === '+1' ? US_BANKS : GLOBAL_BANKS;
+
     const startAddBank = () => {
         setIsAddingBank(true);
         setAddStep(1);
-        setNewBankName(IND_BANKS[0].name);
+        setNewBankName(AVAILABLE_BANKS[0].name);
         setNewAccNum('');
         setConfirmAccNum('');
         setNewIfsc('');
@@ -90,12 +108,16 @@ export function LinkedBanks() {
             setLinkError("Account numbers do not match.");
             return;
         }
-        if (!/^\d{15}$/.test(newAccNum)) {
-            setLinkError("Invalid Account Number. Must be exactly 15 digits.");
+        if (newAccNum.length < 5) {
+            setLinkError("Invalid Account Number.");
             return;
         }
-        if (newIfsc.length !== 11) {
+        if (countryCode === '+91' && newIfsc.length !== 11) {
             setLinkError("Invalid IFSC Code. Must be 11 characters.");
+            return;
+        }
+        if (countryCode === '+1' && newIfsc.length !== 9) {
+            setLinkError("Invalid Routing Number. Must be exactly 9 digits.");
             return;
         }
         setAddStep(2);
@@ -111,7 +133,7 @@ export function LinkedBanks() {
 
         setIsLinking(true);
         setTimeout(async () => {
-            const selectedBank = IND_BANKS.find(b => b.name === newBankName);
+            const selectedBank = AVAILABLE_BANKS.find(b => b.name === newBankName);
             const newBank = {
                 id: Date.now().toString(),
                 bankName: newBankName,
@@ -208,7 +230,7 @@ export function LinkedBanks() {
                         GlobePay Account Balance
                     </div>
                     <div className="text-[40px] font-black text-[#0A1128] tracking-tight leading-none">
-                        ₹{balance.toFixed(2)} <span className="text-xl text-slate-400 font-bold ml-1">INR</span>
+                        {countryCode === '+91' ? '₹' : countryCode === '+1' ? '$' : '£'}{balance.toFixed(2)} <span className="text-xl text-slate-400 font-bold ml-1">{countryCode === '+91' ? 'INR' : countryCode === '+1' ? 'USD' : 'GBP'}</span>
                     </div>
                 </div>
 
@@ -217,7 +239,9 @@ export function LinkedBanks() {
                     <label className="block text-sm font-bold text-[#0A1128] mb-2">Fund your account</label>
                     <div className="flex space-x-2">
                         <div className="relative flex-1">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₹</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
+                                {countryCode === '+91' ? '₹' : countryCode === '+1' ? '$' : '£'}
+                            </span>
                             <input
                                 type="number"
                                 value={addAmount}
@@ -276,22 +300,22 @@ export function LinkedBanks() {
                                         onChange={(e) => setNewBankName(e.target.value)}
                                         className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white outline-none focus:border-blue-500"
                                     >
-                                        {IND_BANKS.map(b => <option key={b.name} value={b.name}>{b.icon} {b.name}</option>)}
+                                        {AVAILABLE_BANKS.map(b => <option key={b.name} value={b.name}>{b.icon} {b.name}</option>)}
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-slate-500 mb-1">Account Number (15 Digits)</label>
+                                    <label className="block text-xs text-slate-500 mb-1">Account Number</label>
                                     <input
                                         type="password"
                                         required
                                         value={newAccNum}
                                         onChange={e => {
                                             const val = e.target.value.replace(/\D/g, ''); // Only allow digits
-                                            if (val.length <= 15) setNewAccNum(val);
+                                            if (val.length <= 20) setNewAccNum(val);
                                         }}
-                                        maxLength={15}
+                                        maxLength={20}
                                         className="w-full p-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-blue-500 font-mono"
-                                        placeholder="Enter 15 digit account number"
+                                        placeholder="Enter account number"
                                     />
                                 </div>
                                 <div>
@@ -302,16 +326,18 @@ export function LinkedBanks() {
                                         value={confirmAccNum}
                                         onChange={e => {
                                             const val = e.target.value.replace(/\D/g, '');
-                                            if (val.length <= 15) setConfirmAccNum(val);
+                                            if (val.length <= 20) setConfirmAccNum(val);
                                         }}
-                                        maxLength={15}
+                                        maxLength={20}
                                         className="w-full p-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-blue-500 font-mono"
-                                        placeholder="Re-enter 15 digit account number"
+                                        placeholder="Re-enter account number"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-slate-500 mb-1">IFSC Code</label>
-                                    <input type="text" required value={newIfsc} onChange={e => setNewIfsc(e.target.value.toUpperCase())} maxLength={11} className="w-full p-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-blue-500 uppercase" placeholder="e.g. SBIN0001234" />
+                                    <label className="block text-xs text-slate-500 mb-1">
+                                        {countryCode === '+91' ? 'IFSC Code' : countryCode === '+1' ? 'Routing Number' : 'SWIFT/BIC Code'}
+                                    </label>
+                                    <input type="text" required value={newIfsc} onChange={e => setNewIfsc(e.target.value.toUpperCase())} maxLength={11} className="w-full p-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-blue-500 uppercase" placeholder={countryCode === '+91' ? "e.g. SBIN0001234" : countryCode === '+1' ? "9 Digit Routing Number" : "SWIFT/BIC Code"} />
                                 </div>
                                 <div className="flex space-x-2 pt-2">
                                     <button type="button" onClick={() => setIsAddingBank(false)} className="flex-1 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg font-medium">Cancel</button>
@@ -366,7 +392,7 @@ export function LinkedBanks() {
                                     </div>
                                     <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                                         <div className="text-sm font-semibold text-[#0A1128]">
-                                            {bank.balanceVisible ? `₹ ${bank.mockBalance.toLocaleString('en-IN')}` : '₹ ••••••'}
+                                            {bank.balanceVisible ? `${countryCode === '+91' ? '₹' : countryCode === '+1' ? '$' : '£'} ${bank.mockBalance.toLocaleString(countryCode === '+1' ? 'en-US' : 'en-IN')}` : `${countryCode === '+91' ? '₹' : countryCode === '+1' ? '$' : '£'} ••••••`}
                                         </div>
                                         <button
                                             onClick={() => toggleBalance(bank.id)}

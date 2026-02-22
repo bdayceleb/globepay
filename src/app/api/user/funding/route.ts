@@ -13,7 +13,8 @@ export async function GET() {
         return NextResponse.json({
             success: true,
             fiatBalance: user.fiatBalance || 0,
-            linkedBanks: user.linkedBanks || []
+            linkedBanks: user.linkedBanks || [],
+            countryCode: user.countryCode || '+1'
         });
     } catch (error) {
         console.error("Fetch Funding Data Error:", error);
