@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Building2, Plus, PlusCircle, Trash2, Wallet, ArrowDown, Eye, CheckCircle } from 'lucide-react';
+import { Building2, Plus, PlusCircle, Trash2, Wallet, ArrowDown, Eye, CheckCircle, RefreshCw } from 'lucide-react';
 
 interface BankAccount {
     id: string;
@@ -47,11 +47,11 @@ export function LinkedBanks() {
                     if (data.success) {
                         setBalance(data.fiatBalance || 0);
                         setCountryCode(data.countryCode || '+91');
-                        // Ensure legacy banks without mockBalance get one
+
+                        // Map balanceVisible onto the incoming DB array
                         const mappedBanks = (data.linkedBanks || []).map((b: any) => ({
                             ...b,
-                            balanceVisible: false,
-                            mockBalance: b.mockBalance || Math.floor(800000 + Math.random() * 1200000)
+                            balanceVisible: false
                         }));
                         setBanks(mappedBanks);
                     }
@@ -64,6 +64,32 @@ export function LinkedBanks() {
         };
         fetchFundingData();
     }, []);
+
+    const handleRefreshBalance = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        const button = e.currentTarget;
+        button.classList.add('animate-spin');
+
+        try {
+            const res = await fetch('/api/user/funding');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    setBalance(data.fiatBalance || 0);
+                    // Match the freshly downloaded DB mockBalances but keep local visual state
+                    const mappedBanks = (data.linkedBanks || []).map((b: any) => ({
+                        ...b,
+                        balanceVisible: banks.find(existing => existing.id === b.id)?.balanceVisible || false
+                    }));
+                    setBanks(mappedBanks);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to refresh balance", error);
+        } finally {
+            setTimeout(() => button.classList.remove('animate-spin'), 600);
+        }
+    };
 
     const IND_BANKS = [
         { name: 'State Bank of India (SBI)', icon: '🏛️' },
@@ -394,12 +420,21 @@ export function LinkedBanks() {
                                         <div className="text-sm font-semibold text-[#0A1128]">
                                             {bank.balanceVisible ? `${countryCode === '+91' ? '₹' : countryCode === '+1' ? '$' : '£'} ${bank.mockBalance.toLocaleString(countryCode === '+1' ? 'en-US' : 'en-IN')}` : `${countryCode === '+91' ? '₹' : countryCode === '+1' ? '$' : '£'} ••••••`}
                                         </div>
-                                        <button
-                                            onClick={() => toggleBalance(bank.id)}
-                                            className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center"
-                                        >
-                                            {bank.balanceVisible ? 'Hide Balance' : <>Check Balance</>}
-                                        </button>
+                                        <div className="flex items-center space-x-3">
+                                            <button
+                                                onClick={(e) => handleRefreshBalance(bank.id, e)}
+                                                className="text-slate-400 hover:text-blue-600 transition"
+                                                title="Refresh Balance"
+                                            >
+                                                <RefreshCw className="w-3.5 h-3.5" />
+                                            </button>
+                                            <button
+                                                onClick={() => toggleBalance(bank.id)}
+                                                className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center"
+                                            >
+                                                {bank.balanceVisible ? 'Hide Balance' : <>Check Balance</>}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))

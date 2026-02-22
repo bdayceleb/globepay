@@ -9,11 +9,24 @@ export async function GET() {
 
         const user = await db.findUserById(session.userId);
         if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        let linkedBanks = user.linkedBanks || [];
+        let needsUpdate = false;
+        linkedBanks = linkedBanks.map(b => {
+            if (b.mockBalance === undefined || b.mockBalance === null) {
+                needsUpdate = true;
+                return { ...b, mockBalance: Math.floor(800000 + Math.random() * 1200000) };
+            }
+            return b;
+        });
+
+        if (needsUpdate) {
+            await db.updateUser(user.id, { linkedBanks });
+        }
 
         return NextResponse.json({
             success: true,
             fiatBalance: user.fiatBalance || 0,
-            linkedBanks: user.linkedBanks || [],
+            linkedBanks: linkedBanks,
             countryCode: user.countryCode || '+91'
         });
     } catch (error) {

@@ -35,6 +35,7 @@ export interface User {
         icon: string;
         accountNumber: string; // Stored encrypted
         ifscCode: string; // Stored as plain text (public routing info)
+        mockBalance?: number;
     }[];
 }
 
