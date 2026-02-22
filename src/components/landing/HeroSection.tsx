@@ -253,7 +253,7 @@ export function HeroSection() {
                                         <input
                                             disabled
                                             value={receiveAmount}
-                                            className="w-full bg-transparent text-2xl sm:text-3xl font-bold text-[#1A2B4C] outline-none truncate"
+                                            className="w-full bg-transparent text-2xl sm:text-3xl font-bold text-[#1A2B4C] disabled:text-[#1A2B4C] disabled:opacity-100 outline-none truncate"
                                         />
                                     </div>
 

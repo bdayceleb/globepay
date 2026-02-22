@@ -244,7 +244,7 @@ export function SendMoneyEngine({ status, onStatusChange }: SendMoneyEngineProps
                                 type="text"
                                 value={otp}
                                 onChange={(e) => setOtp(e.target.value)}
-                                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono tracking-widest text-center text-lg"
+                                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono tracking-widest text-center text-lg text-slate-900 bg-white"
                                 placeholder="• • • • • •"
                                 maxLength={6}
                             />
@@ -439,7 +439,7 @@ export function SendMoneyEngine({ status, onStatusChange }: SendMoneyEngineProps
                                     type="text"
                                     value={recipientName}
                                     onChange={(e) => setRecipientName(e.target.value)}
-                                    className="w-full p-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                                    className="w-full p-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-slate-900 bg-white"
                                     placeholder="Full legal name"
                                 />
                             </div>
@@ -450,7 +450,7 @@ export function SendMoneyEngine({ status, onStatusChange }: SendMoneyEngineProps
                                         type="text"
                                         value={accountNumber}
                                         onChange={(e) => setAccountNumber(e.target.value)}
-                                        className="w-full p-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono"
+                                        className="w-full p-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono text-slate-900 bg-white"
                                         placeholder="Number"
                                     />
                                 </div>
@@ -462,7 +462,7 @@ export function SendMoneyEngine({ status, onStatusChange }: SendMoneyEngineProps
                                         type="text"
                                         value={routingOrIfsc}
                                         onChange={(e) => setRoutingOrIfsc(e.target.value.toUpperCase())}
-                                        className="w-full p-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono uppercase"
+                                        className="w-full p-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono uppercase text-slate-900 bg-white"
                                         placeholder={direction === 'US_TO_IN' ? 'HDFC0001234' : '021000021'}
                                     />
                                 </div>
