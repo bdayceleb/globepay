@@ -4,28 +4,12 @@ import { useEffect, useState } from 'react';
 import { ArrowUpRight, ArrowDownLeft, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { TransactionDraft } from '@/lib/db';
 
-export function RecentTransfers() {
-    const [transfers, setTransfers] = useState<TransactionDraft[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+interface RecentTransfersProps {
+    transfers: TransactionDraft[];
+    isLoading: boolean;
+}
 
-    useEffect(() => {
-        const fetchTransfers = async () => {
-            try {
-                const res = await fetch('/api/transactions/draft');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.success) {
-                        setTransfers(data.transactions);
-                    }
-                }
-            } catch (error) {
-                console.error("Failed to fetch transfers", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchTransfers();
-    }, []);
+export function RecentTransfers({ transfers, isLoading }: RecentTransfersProps) {
 
     const getStatusIcon = (status: string) => {
         switch (status) {

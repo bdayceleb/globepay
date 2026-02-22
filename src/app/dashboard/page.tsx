@@ -12,6 +12,42 @@ export default function Home() {
   const router = useRouter();
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [transferStatus, setTransferStatus] = useState<any>('idle');
+  const [transfers, setTransfers] = useState<any[]>([]);
+  const [isTransfersLoading, setIsTransfersLoading] = useState(true);
+
+  // Polling for real-time updates across the dashboard
+  useEffect(() => {
+    if (isAuthChecking) return;
+
+    let isMounted = true;
+    const pollTransactions = async () => {
+      try {
+        const res = await fetch('/api/transactions/draft');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && isMounted) {
+            setTransfers(data.transactions);
+            setIsTransfersLoading(false);
+
+            // Sync the Transfer Tracker visually if there is a recently spawned transaction
+            if (data.transactions.length > 0) {
+              const latest = data.transactions[0];
+              // Link UI to this transaction if it's strictly from the last 15 minutes
+              if (Date.now() - latest.createdAt < 15 * 60 * 1000) {
+                setTransferStatus(latest.status);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Polling error", error);
+      }
+    };
+
+    pollTransactions(); // initial fetch
+    const interval = setInterval(pollTransactions, 1500); // Poll every 1.5s
+    return () => { isMounted = false; clearInterval(interval); };
+  }, [isAuthChecking]);
 
   useEffect(() => {
     fetch('/api/auth/user').then(res => res.json()).then(data => {
@@ -89,7 +125,7 @@ export default function Home() {
           {/* Column 1: Funding and Recent Transfers */}
           <div className="lg:col-span-3 xl:col-span-3 flex flex-col space-y-6">
             <LinkedBanks />
-            <RecentTransfers />
+            <RecentTransfers transfers={transfers} isLoading={isTransfersLoading} />
           </div>
 
           {/* Column 2: Send Money Engine (Primary) */}
