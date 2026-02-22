@@ -60,18 +60,26 @@ export function HeroSection() {
         return () => clearInterval(interval);
     }, [fromCurrency.code, toCurrency.code]);
 
-    // Network fee visualization
-    const networkFee = fromCurrency.code === 'USD' ? 0.0003 : (fromCurrency.code === 'INR' ? 0.02 : 0.01);
+    // Synchronized conversion logic with SendMoneyEngine
+    const parsedAmount = parseFloat(sendAmount) || 0;
+    const direction = fromCurrency.code === 'USD' && toCurrency.code === 'INR' ? 'US_TO_IN' : (fromCurrency.code === 'INR' && toCurrency.code === 'USD' ? 'IN_TO_US' : null);
+
+    const serviceFee = direction === 'US_TO_IN' ? 4.99 : (direction === 'IN_TO_US' ? 399.00 : (fromCurrency.code === 'USD' ? 4.99 : 399.00));
+    const fxMargin = 0.005; // 0.5% margin
+
+    const isTcsApplicable = (direction === 'IN_TO_US' || fromCurrency.code === 'INR') && parsedAmount > 700000;
+    const taxAmount = (direction === 'IN_TO_US' || fromCurrency.code === 'INR') ? (isTcsApplicable ? parsedAmount * 0.20 : parsedAmount * 0.05) : 0;
+
+    const ourRate = exchangeRate !== null ? exchangeRate * (1 - fxMargin) : 0;
 
     useEffect(() => {
         if (exchangeRate !== null) {
-            const amount = parseFloat(sendAmount) || 0;
-            const afterFee = amount > networkFee ? amount - networkFee : 0;
-            setReceiveAmount((afterFee * exchangeRate).toFixed(2));
+            const recipientGetsAmount = parsedAmount * ourRate;
+            setReceiveAmount(recipientGetsAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
         } else {
             setReceiveAmount("Calculating...");
         }
-    }, [sendAmount, exchangeRate, networkFee]);
+    }, [sendAmount, exchangeRate, ourRate, parsedAmount]);
 
     const handleSwap = () => {
         const temp = fromCurrency;
@@ -196,10 +204,22 @@ export function HeroSection() {
                                         <span className="text-gray-600 font-bold text-xl leading-none -mt-1">-</span>
                                     </div>
                                     <div className="ml-4 flex justify-between w-full pr-2">
-                                        <span className="text-[15px] font-medium text-gray-500">Fast Transfer Fee</span>
-                                        <span className="text-[15px] font-bold text-gray-800">{networkFee} {fromCurrency.code}</span>
+                                        <span className="text-[15px] font-medium text-gray-500">Service Fee</span>
+                                        <span className="text-[15px] font-bold text-gray-800">{serviceFee.toFixed(2)} {fromCurrency.code}</span>
                                     </div>
                                 </div>
+
+                                {taxAmount > 0 && (
+                                    <div className="relative z-10 flex items-center mb-4">
+                                        <div className="w-9 h-9 rounded-full bg-white border border-gray-300 flex items-center justify-center -ml-[3px]">
+                                            <span className="text-gray-600 font-bold text-xl leading-none -mt-1">-</span>
+                                        </div>
+                                        <div className="ml-4 flex justify-between w-full pr-2">
+                                            <span className="text-[15px] font-medium text-gray-500">{isTcsApplicable ? 'TCS (20%)' : 'GST (5%)'}</span>
+                                            <span className="text-[15px] font-bold text-gray-800">{taxAmount.toFixed(2)} {fromCurrency.code}</span>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="relative z-10 flex items-center mb-4">
                                     <div className="w-9 h-9 rounded-full bg-white border border-gray-300 flex items-center justify-center -ml-[3px]">
@@ -207,7 +227,7 @@ export function HeroSection() {
                                     </div>
                                     <div className="ml-4 flex justify-between w-full pr-2">
                                         <span className="text-[15px] font-medium text-gray-500">Amount we'll convert</span>
-                                        <span className="text-[15px] font-bold text-gray-800">{((parseFloat(sendAmount) || 0) > networkFee ? ((parseFloat(sendAmount) || 0) - networkFee) : 0).toFixed(4)} {fromCurrency.code}</span>
+                                        <span className="text-[15px] font-bold text-gray-800">{parsedAmount.toFixed(2)} {fromCurrency.code}</span>
                                     </div>
                                 </div>
 
@@ -216,8 +236,11 @@ export function HeroSection() {
                                         <span className="text-gray-600 font-bold text-lg leading-none">×</span>
                                     </div>
                                     <div className="ml-4 flex justify-between w-full pr-2">
-                                        <span className="text-[15px] font-medium text-[#00B9FF] underline decoration-dashed underline-offset-4 cursor-pointer">Real-time exchange rate</span>
-                                        <span className="text-[15px] font-bold text-[#1A2B4C]">{exchangeRate !== null ? exchangeRate.toFixed(4) : "Loading..."}</span>
+                                        <span className="text-[15px] font-medium text-[#00B9FF] underline decoration-dashed underline-offset-4 cursor-pointer">Guaranteed Rate</span>
+                                        <div className="text-right">
+                                            <span className="text-[15px] font-bold text-green-600 block">{ourRate > 0 ? ourRate.toFixed(4) : "Loading..."}</span>
+                                            <span className="text-[10px] text-gray-400">Live mid-market rate: {exchangeRate !== null ? exchangeRate.toFixed(4) : "..."}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

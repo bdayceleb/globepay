@@ -94,7 +94,24 @@ app.use('/', webhooksRouter);
 app.use('/admin', adminRouter);
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`[Server] 🚀 GlobePay Production Node.js Engine listening on ${PORT}`);
     console.log(`[Server] ENV_MODE: ${process.env.ENV_MODE || 'development'}`);
+});
+
+server.on('error', (err) => {
+    console.error('[Server Error]', err);
+});
+
+process.on('exit', (code) => {
+    console.log(`[Process] About to exit with code: ${code}`);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('[Uncaught Exception]', err);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[Unhandled Rejection]', reason);
 });
