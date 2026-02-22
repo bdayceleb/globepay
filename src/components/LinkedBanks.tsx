@@ -45,11 +45,11 @@ export function LinkedBanks() {
                     const data = await res.json();
                     if (data.success) {
                         setBalance(data.fiatBalance || 0);
-                        // Add local UI state properties to the fetched banks
+                        // Ensure legacy banks without mockBalance get one
                         const mappedBanks = (data.linkedBanks || []).map((b: any) => ({
                             ...b,
                             balanceVisible: false,
-                            mockBalance: Math.floor(10000 + Math.random() * 90000)
+                            mockBalance: b.mockBalance || Math.floor(800000 + Math.random() * 1200000)
                         }));
                         setBanks(mappedBanks);
                     }
@@ -119,6 +119,8 @@ export function LinkedBanks() {
                 accountNumber: newAccNum,
                 ifscCode: newIfsc,
                 isDefault: banks.length === 0,
+                balanceVisible: false,
+                mockBalance: Math.floor(800000 + Math.random() * 1200000) // between 8 Lakhs and 20 Lakhs
             };
 
             // PERSIST TO DATABASE
@@ -130,7 +132,7 @@ export function LinkedBanks() {
                 });
 
                 if (res.ok) {
-                    setBanks([...banks, { ...newBank, balanceVisible: false, mockBalance: Math.floor(10000 + Math.random() * 90000) }]);
+                    setBanks([...banks, newBank]);
                     setIsAddingBank(false);
                 } else {
                     setLinkError("Failed to link bank to database.");

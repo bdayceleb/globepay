@@ -5,7 +5,7 @@ import { ArrowRight, ChevronDown, CheckCircle, Info, Building2 } from 'lucide-re
 import { TransactionDraft } from '@/lib/db';
 
 interface SendMoneyEngineProps {
-    onStatusChange: (status: string) => void;
+    onStatusChange: (status: 'idle' | 'draft' | 'initiated' | 'processing' | 'funded' | 'converted_to_usdc' | 'broadcasted_to_solana' | 'confirmed_on_chain' | 'off_ramp_processing' | 'completed' | 'failed') => void;
 }
 
 export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {

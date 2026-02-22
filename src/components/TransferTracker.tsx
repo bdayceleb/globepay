@@ -3,7 +3,7 @@
 import { CheckCircle, Circle, Clock } from 'lucide-react';
 
 interface TransferTrackerProps {
-    status: 'idle' | 'draft' | 'initiated' | 'processing' | 'funded' | 'converted' | 'completed' | 'failed';
+    status: 'idle' | 'draft' | 'initiated' | 'processing' | 'funded' | 'converted_to_usdc' | 'broadcasted_to_solana' | 'confirmed_on_chain' | 'off_ramp_processing' | 'completed' | 'failed';
 }
 
 export function TransferTracker({ status }: TransferTrackerProps) {
@@ -19,9 +19,9 @@ export function TransferTracker({ status }: TransferTrackerProps) {
     // Determine numerical progress
     const getProgressIndex = () => {
         if (status === 'completed') return 4;
-        if (status === 'converted') return 3;
-        if (status === 'funded') return 2;
-        if (status === 'initiated' || status === 'processing') return 1;
+        if (status === 'off_ramp_processing' || status === 'confirmed_on_chain') return 3;
+        if (status === 'broadcasted_to_solana' || status === 'converted_to_usdc') return 2;
+        if (status === 'funded' || status === 'initiated' || status === 'processing') return 1;
         return 0; // idle or draft
     };
 

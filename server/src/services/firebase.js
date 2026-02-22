@@ -18,6 +18,10 @@ const syncTransactionToFirebase = async (tx) => {
     try {
         if (!tx.id) return;
 
+        // Pitch Demo Fix: Do NOT save 'draft' UI states to the live dashboard.
+        // It heavily clutters the feed and makes it look like real transactions failed.
+        if (tx.status === 'draft') return;
+
         // We push the full transaction payload to Firestore mapped to the Next.js `TransactionDraft` schema
         const payload = {
             id: tx.id,
