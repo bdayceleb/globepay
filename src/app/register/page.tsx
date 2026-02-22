@@ -13,6 +13,10 @@ export default function RegisterPage() {
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
 
+    // KYC Details
+    const [kycDocumentId, setKycDocumentId] = useState('');
+    const [panNumber, setPanNumber] = useState('');
+
     // Step 2 OTP
     const [emailOtp, setEmailOtp] = useState('');
     const [phoneOtp, setPhoneOtp] = useState('');
@@ -61,11 +65,22 @@ export default function RegisterPage() {
 
         try {
             const fullPhone = `${countryCode}${phone}`;
+
+            // Attach dynamic KYC based on country
+            let kycData: any = {};
+            if (countryCode === '+91') {
+                kycData = { aadhaar: kycDocumentId, pan: panNumber };
+            } else if (countryCode === '+1') {
+                kycData = { ssn: kycDocumentId };
+            } else {
+                kycData = { nationalId: kycDocumentId };
+            }
+
             // Both OTPs verified, proceed to actual registration
             const res = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, phone: fullPhone, password }),
+                body: JSON.stringify({ email, phone: fullPhone, password, countryCode, kycData }),
             });
 
             const data = await res.json();
@@ -136,6 +151,63 @@ export default function RegisterPage() {
                                 />
                             </div>
                         </div>
+
+                        {/* Dynamic KYC Fields based on Country */}
+                        <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl space-y-4">
+                            {countryCode === '+91' ? (
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Aadhaar Number <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={kycDocumentId}
+                                            onChange={(e) => setKycDocumentId(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00B9FF] focus:border-transparent outline-none transition"
+                                            placeholder="XXXX XXXX XXXX"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">PAN Number <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={panNumber}
+                                            onChange={(e) => setPanNumber(e.target.value.toUpperCase())}
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00B9FF] focus:border-transparent outline-none transition uppercase uppercase-placeholder"
+                                            placeholder="ABCDE1234F"
+                                        />
+                                        <p className="text-xs text-slate-500 mt-1">Required for Liberalised Remittance Scheme (LRS) compliance.</p>
+                                    </div>
+                                </>
+                            ) : countryCode === '+1' ? (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Social Security Number (SSN) <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={kycDocumentId}
+                                        onChange={(e) => setKycDocumentId(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00B9FF] focus:border-transparent outline-none transition font-mono"
+                                        placeholder="XXX-XX-XXXX"
+                                    />
+                                    <p className="text-xs text-slate-500 mt-1">Required for Patriot Act & FinCEN compliance.</p>
+                                </div>
+                            ) : (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">National ID / Passport Number <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={kycDocumentId}
+                                        onChange={(e) => setKycDocumentId(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#00B9FF] focus:border-transparent outline-none transition"
+                                        placeholder="Document Number"
+                                    />
+                                </div>
+                            )}
+                        </div>
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
                             <input

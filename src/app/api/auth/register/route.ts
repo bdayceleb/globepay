@@ -6,12 +6,12 @@ import { createSession } from '@/lib/session';
 export async function POST(request: Request) {
     console.log("[API] Registration request received");
     try {
-        const { email, phone, password } = await request.json();
+        const { email, phone, password, countryCode, kycData } = await request.json();
         console.log(`[API] Attempting to register email: ${email}`);
 
-        if (!email || !password || !phone) {
-            console.log("[API] Missing email, phone, or password");
-            return NextResponse.json({ error: 'Email, phone, and password required' }, { status: 400 });
+        if (!email || !password || !phone || !kycData) {
+            console.log("[API] Missing required registration fields");
+            return NextResponse.json({ error: 'Email, phone, password, and identity documents required' }, { status: 400 });
         }
 
         console.log("[API] Checking if user exists in DB...");
@@ -30,7 +30,9 @@ export async function POST(request: Request) {
             id: Date.now().toString(),
             email: email.toLowerCase(),
             phone: phone,
+            countryCode: countryCode,
             passwordHash: hashedPassword,
+            kycData: kycData,
             isKycComplete: false,
             fiatBalance: 0,
             linkedBanks: []
