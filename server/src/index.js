@@ -36,7 +36,7 @@ app.get('/quote', async (req, res) => {
 // 3. Orchestration Entry Point (Initiate a transfer)
 app.post('/transfer', async (req, res) => {
     try {
-        const { userId, direction, sendAmount, fromCountry, toCountry } = req.body;
+        const { userId, direction, sendAmount, fromCountry, toCountry, recipientDetails } = req.body;
 
         // 1. Calculate realistic fees
         const quote = await fxEngine.calculateQuote(sendAmount, direction);
@@ -69,6 +69,9 @@ app.post('/transfer', async (req, res) => {
                 serviceFee: quote.serviceFee,
                 taxAmount: quote.taxAmount,
                 estimatedPayout: quote.estimatedPayout,
+                recipientName: recipientDetails?.name || null,
+                recipientAccount: recipientDetails?.accountNumber || null,
+                routingNumber: recipientDetails?.routingOrIfsc || null,
                 status: 'draft',
             }
         });

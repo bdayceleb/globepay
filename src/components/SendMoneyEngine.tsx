@@ -126,7 +126,12 @@ export function SendMoneyEngine({ status, onStatusChange }: SendMoneyEngineProps
                     totalPayAmount: totalYouPay,
                     fundingSource: selectedBankId,
                     fromCountry: direction === 'US_TO_IN' ? 'US' : 'IN',
-                    toCountry: direction === 'US_TO_IN' ? 'IN' : 'US'
+                    toCountry: direction === 'US_TO_IN' ? 'IN' : 'US',
+                    recipientDetails: {
+                        name: recipientName,
+                        accountNumber: accountNumber,
+                        routingOrIfsc: routingOrIfsc
+                    }
                 })
             });
             const data = await res.json();

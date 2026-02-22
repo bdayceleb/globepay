@@ -40,7 +40,12 @@ const syncTransactionToFirebase = async (tx) => {
             updatedAt: tx.updatedAt ? new Date(tx.updatedAt).getTime() : Date.now(),
             createdAt: tx.createdAt ? new Date(tx.createdAt).getTime() : Date.now(),
             blockchainTxHash: tx.blockchainTxHash || null,
-            blockchainMemoHash: tx.blockchainMemoHash || null
+            blockchainMemoHash: tx.blockchainMemoHash || null,
+            recipientDetails: tx.recipientName ? {
+                name: tx.recipientName,
+                accountNumber: tx.recipientAccount || undefined,
+                routing: tx.routingNumber || undefined
+            } : null
         };
 
         await setDoc(doc(firestore, 'transactions', tx.id), payload, { merge: true });

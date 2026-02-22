@@ -194,7 +194,7 @@ export default function ProfilePage() {
                                     Global Fiat Balance
                                 </h3>
                                 <div className="text-3xl font-black tracking-tight mb-1">
-                                    ${(user?.fiatBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    ₹{(user?.fiatBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </div>
                                 <div className="text-xs text-blue-200 px-2 py-1 bg-white/10 rounded-md w-fit font-medium">
                                     Avail. for outbound transfer

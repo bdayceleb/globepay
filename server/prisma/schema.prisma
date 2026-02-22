@@ -52,6 +52,9 @@ model Transaction {
   serviceFee         Float
   taxAmount          Float
   estimatedPayout    Float
+  recipientName      String?
+  recipientAccount   String?
+  routingNumber      String?
   blockchainTxHash   String?
   blockchainMemoHash String?
   status             String   @default("draft") // draft -> initiated -> funded -> converted_to_usdc -> broadcasted_to_solana -> confirmed_on_chain -> off_ramp_processing -> completed

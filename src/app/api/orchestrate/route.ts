@@ -8,7 +8,7 @@ export async function POST(request: Request) {
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const body = await request.json();
-        const { direction, sendAmount, totalPayAmount, fundingSource, fromCountry, toCountry } = body;
+        const { direction, sendAmount, totalPayAmount, fundingSource, fromCountry, toCountry, recipientDetails } = body;
 
         // Security check: Verify the user actually has enough Firebase cash to fund this.
         let userToDeduct = null;
@@ -33,7 +33,8 @@ export async function POST(request: Request) {
                 direction: mappedDirection,
                 sendAmount,
                 fromCountry,
-                toCountry
+                toCountry,
+                recipientDetails
             })
         });
 
