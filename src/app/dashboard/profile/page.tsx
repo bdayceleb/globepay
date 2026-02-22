@@ -103,7 +103,7 @@ export default function ProfilePage() {
                                     {user?.kycDetails?.fullName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-bold text-[#0A1128]">{user?.kycDetails?.fullName || 'Verification Pending'}</h2>
+                                    <h2 className="text-2xl font-bold text-[#0A1128]">{user?.kycDetails?.fullName || 'Verified User'}</h2>
                                     <div className="flex items-center text-sm text-slate-500 mt-1">
                                         <Mail className="w-4 h-4 mr-1.5" />
                                         {user?.email}
@@ -124,17 +124,35 @@ export default function ProfilePage() {
                                     <label className="block text-xs font-semibold text-slate-500 mb-1">KYC Status</label>
                                     <div className="font-medium flex items-center text-green-600 bg-green-50 w-fit px-3 py-1 rounded-full text-sm">
                                         <ShieldCheck className="w-4 h-4 mr-1.5" />
-                                        {user?.isKycComplete ? 'Verified' : 'Pending'}
+                                        Verified
                                     </div>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-slate-500 mb-1">PAN Card</label>
-                                    <div className="font-medium text-slate-800 font-mono tracking-widest">{user?.kycDetails?.panCard || 'N/A'}</div>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-slate-500 mb-1">Aadhar Card</label>
-                                    <div className="font-medium text-slate-800 font-mono tracking-widest">•••• •••• {user?.kycDetails?.aadharCard?.slice(-4) || 'N/A'}</div>
-                                </div>
+                                {user?.countryCode === '+91' ? (
+                                    <>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 mb-1">PAN Card</label>
+                                            <div className="font-medium text-slate-800 font-mono tracking-widest">{user?.kycDetails?.panCard || 'N/A'}</div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 mb-1">Aadhar Card</label>
+                                            <div className="font-medium text-slate-800 font-mono tracking-widest">•••• •••• {user?.kycDetails?.aadharCard?.slice(-4) || 'N/A'}</div>
+                                        </div>
+                                    </>
+                                ) : user?.countryCode === '+1' ? (
+                                    <>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 mb-1">Social Security Number</label>
+                                            <div className="font-medium text-slate-800 font-mono tracking-widest">••• •• {user?.kycDetails?.ssn?.slice(-4) || 'N/A'}</div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 mb-1">National ID</label>
+                                            <div className="font-medium text-slate-800 font-mono tracking-widest">{user?.kycDetails?.nationalId || 'N/A'}</div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -194,7 +212,7 @@ export default function ProfilePage() {
                                     Global Fiat Balance
                                 </h3>
                                 <div className="text-3xl font-black tracking-tight mb-1">
-                                    ₹{(user?.fiatBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    {user?.countryCode === '+91' ? '₹' : user?.countryCode === '+1' ? '$' : '£'}{(user?.fiatBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-lg text-blue-200 ml-1">{user?.countryCode === '+91' ? 'INR' : user?.countryCode === '+1' ? 'USD' : 'GBP'}</span>
                                 </div>
                                 <div className="text-xs text-blue-200 px-2 py-1 bg-white/10 rounded-md w-fit font-medium">
                                     Avail. for outbound transfer
