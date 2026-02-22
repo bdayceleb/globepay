@@ -199,16 +199,16 @@ export function LinkedBanks() {
     };
 
     return (
-        <div className="space-y-6 relative z-20">
+        <div className="space-y-8 relative z-20">
             {/* Card 1: GlobePay Balance */}
-            <div className="bg-white p-6 sm:p-7 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 w-full hover:shadow-2xl transition duration-300">
-                <div className="mb-6">
-                    <div className="flex items-center text-slate-500 font-medium mb-1 tracking-wide text-sm uppercase">
-                        <Wallet className="w-4 h-4 mr-2" />
+            <div className="relative bg-white/90 backdrop-blur-2xl p-6 sm:p-7 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 w-full hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)] transition-all duration-500 overflow-hidden">
+                <div className="mb-6 relative z-10">
+                    <div className="flex items-center text-slate-500 font-semibold mb-2 tracking-widest text-[10px] text-xs uppercase">
+                        <Wallet className="w-4 h-4 mr-2 text-blue-500" />
                         GlobePay Account Balance
                     </div>
-                    <div className="text-4xl font-extrabold text-[#0A1128] tracking-tight">
-                        ₹{balance.toFixed(2)} <span className="text-lg text-slate-400 font-semibold">INR</span>
+                    <div className="text-[40px] font-black text-[#0A1128] tracking-tight leading-none">
+                        ₹{balance.toFixed(2)} <span className="text-xl text-slate-400 font-bold ml-1">INR</span>
                     </div>
                 </div>
 
@@ -249,8 +249,8 @@ export function LinkedBanks() {
             </div>
 
             {/* Card 2: Linked Banks Section */}
-            <div className="bg-white p-6 sm:p-7 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 w-full hover:shadow-2xl transition duration-300">
-                <div className="flex justify-between items-center mb-4">
+            <div className="relative bg-white/90 backdrop-blur-2xl p-6 sm:p-7 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 w-full hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)] transition-all duration-500 overflow-hidden">
+                <div className="flex justify-between items-center mb-5 relative z-10">
                     <h3 className="font-bold text-[#0A1128]">Linked Bank Accounts</h3>
                     {!isAddingBank && (
                         <button
@@ -345,8 +345,8 @@ export function LinkedBanks() {
                             </div>
                         ) : (
                             banks.map(bank => (
-                                <div key={bank.id} className="p-3 border border-slate-200 rounded-xl hover:border-slate-300 transition bg-white relative group">
-                                    <div className="flex items-center justify-between mb-2">
+                                <div key={bank.id} className="p-4 border border-slate-200/60 rounded-2xl hover:border-blue-200 hover:bg-blue-50/30 transition-all bg-white shadow-sm relative group">
+                                    <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center">
                                             <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mr-3 text-xl">
                                                 {bank.icon}

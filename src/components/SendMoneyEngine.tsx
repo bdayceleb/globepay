@@ -158,10 +158,11 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
 
     if (step === 'payment') {
         return (
-            <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 overflow-hidden w-full flex flex-col hover:shadow-lg transition-shadow duration-300">
-                <div className="bg-[#0A1128] p-5 text-white">
-                    <h2 className="text-xl font-bold">Secure Payment</h2>
-                    <p className="text-blue-200 text-sm mt-1">Authorize your transfer of {totalYouPay.toFixed(2)} {fromCurrency}</p>
+            <div className="relative bg-white/90 backdrop-blur-2xl rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/60 overflow-hidden w-full flex flex-col transition-all duration-500 hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)]">
+                <div className="bg-gradient-to-r from-[#0A1128] via-[#111c3d] to-[#0A1128] p-6 text-white relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[40px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+                    <h2 className="text-xl font-extrabold tracking-tight relative z-10">Secure Payment</h2>
+                    <p className="text-blue-200 text-sm mt-1.5 font-medium relative z-10">Authorize your transfer of {totalYouPay.toFixed(2)} {fromCurrency}</p>
                 </div>
                 <div className="p-6 space-y-6">
                     <h3 className="font-bold text-slate-800">Select Funding Source</h3>
@@ -247,13 +248,14 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
     }
 
     return (
-        <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 overflow-hidden w-full flex flex-col hover:shadow-lg transition-shadow duration-300">
+        <div className="relative bg-white/90 backdrop-blur-2xl rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/60 overflow-hidden w-full flex flex-col transition-all duration-500 hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)]">
             {/* Direction Selector Header */}
-            <div className="bg-[#0A1128] p-4 text-white shrink-0">
-                <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-xl font-bold">Transfer Details</h2>
+            <div className="bg-gradient-to-r from-[#0A1128] via-[#111c3d] to-[#0A1128] p-5 sm:p-6 text-white shrink-0 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[40px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+                <div className="flex items-center justify-between mb-4 relative z-10">
+                    <h2 className="text-xl font-extrabold tracking-tight">Transfer Details</h2>
                 </div>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 relative z-10">
                     {/* From Dropdown */}
                     <div className="flex-1 relative group cursor-pointer">
                         <select
@@ -327,17 +329,17 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
             ) : (
                 <div className="p-4 sm:p-5 space-y-5 overflow-y-auto">
                     {/* Calculator Section */}
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         {/* You Send */}
-                        <div className="flex items-center border border-slate-200 rounded-xl p-3 bg-slate-50 focus-within:ring-2 focus-within:ring-blue-500 focus-within:bg-white transition-all">
+                        <div className="flex items-center border border-slate-200/60 rounded-2xl p-4 bg-white shadow-sm focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent focus-within:shadow-md transition-all group">
                             <div className="flex-1">
-                                <div className="text-[11px] font-medium text-slate-500 mb-0.5">You send exactly</div>
+                                <div className="text-xs font-semibold text-slate-500 mb-1 tracking-wide uppercase">You send exactly</div>
                                 <input
                                     type="number"
                                     value={sendAmount}
                                     onChange={(e) => setSendAmount(e.target.value)}
-                                    className="w-full bg-transparent text-2xl font-extrabold text-[#0A1128] outline-none"
-                                    placeholder="1,000"
+                                    className="w-full bg-transparent text-3xl font-black text-[#0A1128] outline-none placeholder:text-slate-300"
+                                    placeholder="1000"
                                 />
                             </div>
                             <div className="flex items-center bg-white border border-slate-200 px-3 py-1.5 rounded-lg font-bold text-sm">
@@ -387,10 +389,10 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
                         </div>
 
                         {/* Recipient Gets */}
-                        <div className="flex items-center border border-slate-200 rounded-xl p-3 bg-slate-50">
+                        <div className="flex items-center border border-slate-200/60 rounded-2xl p-4 bg-slate-50 shadow-inner group">
                             <div className="flex-1">
-                                <div className="text-[11px] font-medium text-slate-500 mb-0.5">Recipient gets</div>
-                                <div className="text-2xl font-extrabold text-[#0A1128]">
+                                <div className="text-xs font-semibold text-slate-500 mb-1 tracking-wide uppercase">Recipient gets</div>
+                                <div className="text-3xl font-black text-[#0A1128]">
                                     {recipientGets.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </div>
                             </div>
@@ -489,7 +491,7 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
 
                         <button
                             onClick={handleContinue}
-                            className="w-full bg-[#0A1128] hover:bg-[#15234b] text-white py-3 rounded-xl font-bold text-base shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
+                            className="w-full bg-gradient-to-r from-[#0A1128] to-[#1a2b5e] hover:from-[#15234b] hover:to-[#223876] text-white py-4 rounded-2xl font-bold text-lg shadow-[0_4px_14px_0_rgb(10,17,40,0.39)] hover:shadow-[0_6px_20px_rgb(10,17,40,0.23)] transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
                         >
                             Continue to Payment
                         </button>

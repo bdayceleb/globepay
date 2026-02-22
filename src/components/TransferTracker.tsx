@@ -28,8 +28,8 @@ export function TransferTracker({ status }: TransferTrackerProps) {
     const currentIndex = getProgressIndex();
 
     return (
-        <div className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 h-full w-full sticky top-24">
-            <h3 className="text-xl font-bold text-[#0A1128] mb-8">Transfer Status</h3>
+        <div className="relative bg-white/90 backdrop-blur-2xl p-6 sm:p-7 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 w-full hover:shadow-[0_8px_40px_rgb(0,0,0,0.08)] transition-all duration-500 overflow-hidden sticky top-24">
+            <h3 className="text-xl font-extrabold text-[#0A1128] mb-8 relative z-10 tracking-tight">Transfer Status</h3>
 
             {status === 'idle' || status === 'draft' ? (
                 <div className="text-center py-12 text-slate-400 text-sm">
@@ -57,15 +57,19 @@ export function TransferTracker({ status }: TransferTrackerProps) {
 
                         return (
                             <div key={step.id} className="relative z-10 flex items-start group">
-                                <div className="shrink-0 mr-4">
+                                <div className="shrink-0 mr-5">
                                     {isCompleted ? (
-                                        <CheckCircle className="w-7 h-7 text-green-500 bg-white rounded-full" />
+                                        <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center border border-green-200 shadow-sm relative z-10">
+                                            <CheckCircle className="w-5 h-5 text-green-500" />
+                                        </div>
                                     ) : isCurrent ? (
-                                        <div className="w-7 h-7 rounded-full bg-white border-2 border-blue-500 flex items-center justify-center shadow-sm">
+                                        <div className="w-8 h-8 rounded-full bg-white border-[2.5px] border-blue-500 flex items-center justify-center shadow-md relative z-10 ring-4 ring-blue-50">
                                             <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse"></div>
                                         </div>
                                     ) : (
-                                        <Circle className="w-7 h-7 text-slate-200 bg-white rounded-full" />
+                                        <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center z-10 relative">
+                                            <Circle className="w-3 h-3 text-slate-300" />
+                                        </div>
                                     )}
                                 </div>
                                 <div className="mt-1">

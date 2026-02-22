@@ -73,9 +73,12 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen pb-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50/50 via-slate-50 to-white selection:bg-blue-100">
+    <main className="min-h-screen pb-20 bg-[#F6F9FC] selection:bg-blue-100 relative overflow-hidden">
+      {/* Premium Ambient Background Glows */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[400px] bg-gradient-to-r from-blue-100/40 via-indigo-50/40 to-white/0 blur-[80px] rounded-full pointer-events-none -z-10" />
+
       {/* Header */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50 hidden sm:block">
+      <nav className="bg-white/70 backdrop-blur-xl border-b border-white/50 sticky top-0 z-50 hidden sm:block shadow-[0_4px_30px_rgb(0,0,0,0.03)]">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -109,14 +112,20 @@ export default function Home() {
       </nav>
 
       {/* Dashboard Workspace */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-16">
-        <div className="mb-8 border-b border-slate-200/60 pb-6">
-          <h1 className="text-3xl font-extrabold text-[#0A1128] tracking-tight">
-            Dashboard
-          </h1>
-          <p className="text-slate-500 mt-1.5 font-medium">
-            Manage your wallet, track transfers, and send money globally.
-          </p>
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-16 relative z-10">
+        <div className="mb-8 border-b border-slate-200/50 pb-6 flex items-baseline justify-between">
+          <div>
+            <h1 className="text-[32px] font-extrabold text-[#0A1128] tracking-tight">
+              Dashboard
+            </h1>
+            <p className="text-slate-500 mt-1 font-medium text-sm">
+              Manage your wallet, track transfers, and send money globally.
+            </p>
+          </div>
+          {/* Decorative Date or Status */}
+          <div className="hidden md:block text-xs font-bold text-slate-400 uppercase tracking-wider bg-white/50 px-3 py-1.5 rounded-full border border-slate-200/60">
+            Live Global Markets
+          </div>
         </div>
 
         {/* 2-Column App Layout */}
