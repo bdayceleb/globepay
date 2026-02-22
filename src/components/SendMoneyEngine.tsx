@@ -158,7 +158,7 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
 
     if (step === 'payment') {
         return (
-            <div className="bg-white rounded-[20px] shadow-xl border border-slate-100 overflow-hidden w-full max-w-2xl mx-auto flex flex-col">
+            <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 overflow-hidden w-full flex flex-col hover:shadow-lg transition-shadow duration-300">
                 <div className="bg-[#0A1128] p-5 text-white">
                     <h2 className="text-xl font-bold">Secure Payment</h2>
                     <p className="text-blue-200 text-sm mt-1">Authorize your transfer of {totalYouPay.toFixed(2)} {fromCurrency}</p>
@@ -247,7 +247,7 @@ export function SendMoneyEngine({ onStatusChange }: SendMoneyEngineProps) {
     }
 
     return (
-        <div className="bg-white rounded-[20px] shadow-xl border border-slate-100 overflow-hidden w-full max-w-2xl mx-auto flex flex-col max-h-[85vh]">
+        <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 overflow-hidden w-full flex flex-col hover:shadow-lg transition-shadow duration-300">
             {/* Direction Selector Header */}
             <div className="bg-[#0A1128] p-4 text-white shrink-0">
                 <div className="flex items-center justify-between mb-2">

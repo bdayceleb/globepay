@@ -108,35 +108,29 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-16">
-        <div className="text-center max-w-2xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-[#0A1128] tracking-tight mb-4">
-            Send Money Globally.
+      {/* Dashboard Workspace */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-16">
+        <div className="mb-8 border-b border-slate-200/60 pb-6">
+          <h1 className="text-3xl font-extrabold text-[#0A1128] tracking-tight">
+            Dashboard
           </h1>
-          <p className="text-lg text-slate-600 mb-8 font-medium">
-            Fast, transparent international transfers with real exchange rates.
+          <p className="text-slate-500 mt-1.5 font-medium">
+            Manage your wallet, track transfers, and send money globally.
           </p>
         </div>
 
-        {/* Main Application Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-10">
+        {/* 2-Column App Layout */}
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
 
-          {/* Column 1: Funding and Recent Transfers */}
-          <div className="lg:col-span-3 xl:col-span-3 flex flex-col space-y-6">
-            <LinkedBanks />
+          {/* Main Action Area (Left) */}
+          <div className="w-full lg:w-7/12 flex flex-col space-y-8">
+            <SendMoneyEngine onStatusChange={setTransferStatus} />
             <RecentTransfers transfers={transfers} isLoading={isTransfersLoading} />
           </div>
 
-          {/* Column 2: Send Money Engine (Primary) */}
-          <div className="lg:col-span-6 xl:col-span-6 flex justify-center">
-            <div className="w-full max-w-2xl">
-              <SendMoneyEngine onStatusChange={setTransferStatus} />
-            </div>
-          </div>
-
-          {/* Column 3: Transfer Tracker */}
-          <div className="lg:col-span-3 xl:col-span-3">
+          {/* Wallet & Tracking Sidebar (Right) */}
+          <div className="w-full lg:w-5/12 flex flex-col space-y-8 sticky top-24">
+            <LinkedBanks />
             <TransferTracker status={transferStatus} />
           </div>
 
