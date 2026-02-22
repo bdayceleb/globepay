@@ -82,7 +82,6 @@ export default function KycPage() {
                     </div>
                 </div>
                 <h2 className="text-2xl font-bold text-center text-[#0A1128] mb-2">Verify your identity</h2>
-                <p className="text-center text-gray-500 mb-8">We require standard KYC documentation under the Prevention of Money Laundering Act (PMLA).</p>
 
                 {error && (
                     <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-6 text-sm">

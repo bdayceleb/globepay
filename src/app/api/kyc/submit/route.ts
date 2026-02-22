@@ -9,15 +9,16 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { fullName, aadharCard, panCard } = await request.json();
+        const { fullName, countryCode, kycData } = await request.json();
 
-        if (!fullName || !aadharCard || !panCard) {
-            return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
+        // Allow some flexibility since the frontend validates the country-specific subfields
+        if (!fullName || !countryCode || !kycData) {
+            return NextResponse.json({ error: 'All primary identity fields are required' }, { status: 400 });
         }
 
         await db.updateUser(session.userId, {
             isKycComplete: true,
-            kycDetails: { fullName, aadharCard, panCard }
+            kycData: { fullName, ...kycData }
         });
 
         return NextResponse.json({ success: true });
